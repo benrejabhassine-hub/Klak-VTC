@@ -3,136 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>KLAK - L'Excellence VTC</title>
+    <title>KLAK - Transport de Prestige</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background: #000; color: white; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         
-        /* --- ANIMATION D'ENTRÉE (LOADER) --- */
-        #klak-loader {
-            position: fixed; inset: 0; background: #000; z-index: 10000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .snap-icon { font-size: 80px; animation: snapAnim 1.2s ease-in-out infinite; }
-        @keyframes snapAnim {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2) rotate(10deg); }
-        }
-        .loader-text { 
-            font-size: 50px; font-weight: 900; font-style: italic; color: #fbbf24;
-            letter-spacing: -2px; margin-top: 20px; opacity: 0; animation: fadeIn 0.5s forwards 0.5s;
-        }
-        @keyframes fadeIn { to { opacity: 1; } }
+        /* Animations Prestige */
+        @keyframes snapIn { 0% { transform: scale(0) rotate(-20deg); opacity: 0; } 70% { transform: scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        
+        #klak-loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.6s ease 2s forwards; }
+        .snap-emoji { font-size: 80px; animation: snapIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .klak-text { color: #fbbf24; font-weight: 900; font-size: 3rem; font-style: italic; letter-spacing: -3px; margin-top: 10px; }
 
-        /* --- DESIGN MODERNE --- */
-        .glass-card { 
-            background: rgba(255,255,255,0.03); backdrop-filter: blur(30px); 
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 40px;
-            transform: translateY(30px); opacity: 0; animation: slideUp 0.8s forwards 1.8s;
-        }
-        @keyframes slideUp { to { transform: translateY(0); opacity: 1; } }
+        body { background: #000; color: white; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.08); border-radius: 40px; }
+        
+        .input-wrap { background: rgba(255,255,255,0.07); border-radius: 20px; display: flex; align-items: center; border: 1px solid transparent; transition: 0.3s; }
+        .input-wrap:focus-within { border-color: #fbbf24; background: rgba(255,255,255,0.12); }
+        input { background: transparent; width: 100%; outline: none; color: white; padding: 18px; font-size: 15px; }
+        
+        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 15px; display: none; max-height: 200px; overflow-y: auto; margin-top: 5px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .suggestion-item { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; font-weight: 700; color: #111; }
+        
+        .btn-main { background: #fbbf24; color: #000; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2); }
+        .btn-main:active { transform: scale(0.96); }
 
-        .k-input { 
-            background: rgba(255,255,255,0.06); border-radius: 22px; padding: 22px; 
-            width: 100%; border: 1px solid transparent; color: #fff; outline: none; transition: 0.4s;
-        }
-        .k-input:focus { border-color: #fbbf24; background: rgba(255,255,255,0.12); box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); }
-
-        .btn-gold { 
-            background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; font-weight: 900;
-            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-            box-shadow: 0 15px 35px rgba(217, 119, 6, 0.3);
-        }
-        .btn-gold:active { transform: scale(0.95); }
-
-        .suggestion-box { 
-            position: absolute; z-index: 100; width: 100%; background: #fff; color: #000; 
-            border-radius: 20px; display: none; max-height: 200px; overflow-y: auto; margin-top: 5px; 
-        }
-        .suggestion-item { padding: 15px; border-bottom: 1px solid #eee; font-weight: 700; color: #111; }
-
-        /* --- FACTURETTE ANIMÉE --- */
-        #success-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 20000; align-items: center; justify-content: center; padding: 20px; }
-        .invoice-pop { background: white; color: black; border-radius: 50px; width: 100%; max-width: 400px; padding: 40px; text-align: center; transform: scale(0.8); opacity: 0; }
-        .show-invoice { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes popIn { to { transform: scale(1); opacity: 1; } }
+        #invoiceModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen max-w-lg mx-auto">
 
     <div id="klak-loader">
-        <div class="snap-icon">👌</div>
-        <div class="loader-text">KLAK</div>
+        <div class="snap-emoji">👌</div>
+        <div class="klak-text">KLAK</div>
     </div>
 
-    <div id="success-modal">
-        <div class="invoice-pop" id="invoice-card">
-            <div class="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl"><i class="fas fa-check text-4xl"></i></div>
-            <h2 class="text-3xl font-black italic uppercase">RESERVE !</h2>
-            <div class="border-y-2 border-dashed border-gray-100 py-6 my-6 text-5xl font-black" id="final-p">-- €</div>
-            <p class="text-sm font-bold text-gray-500 mb-8 italic">Votre chauffeur premium arrive à votre position.</p>
-            <button onclick="location.reload()" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase">Terminer</button>
+    <div id="invoiceModal">
+        <div class="bg-white text-black w-full rounded-[45px] p-10 space-y-8 text-center shadow-2xl animate-[snapIn_0.5s]">
+            <div class="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto shadow-lg"><i class="fas fa-check text-4xl"></i></div>
+            <h2 class="text-3xl font-black italic uppercase">C'EST KLAKÉ !</h2>
+            <div class="border-y-2 border-dashed border-gray-100 py-6">
+                <p class="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Tarif Fixe Garanti</p>
+                <p class="text-5xl font-black" id="invPrice">-- €</p>
+            </div>
+            <p class="text-xs font-bold italic text-yellow-700">Le chauffeur a reçu votre demande et vous contacte par SMS.</p>
+            <button onclick="location.reload()" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase tracking-widest">Fermer</button>
         </div>
     </div>
 
-    <header class="text-center py-10 opacity-0" style="animation: fadeIn 1s forwards 1.8s;">
-        <h1 class="text-9xl font-black italic tracking-tighter leading-none">KLAK</h1>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[8px] mt-2">Expert Prestige Grenoble</p>
+    <header class="text-center py-10">
+        <h1 class="text-8xl font-black italic tracking-tighter text-white leading-none">KLAK</h1>
+        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[8px] mt-2">Expert Prestige Line</p>
     </header>
 
-    <main class="glass-card p-8 space-y-7 shadow-2xl">
+    <main class="glass p-7 space-y-6 shadow-2xl">
         <div class="relative">
-            <div class="flex justify-between mb-2 px-1"><label class="text-[10px] font-black text-gray-500 uppercase">Départ</label><button onclick="getGPS()" class="text-yellow-500 text-[10px] font-black uppercase"><i class="fas fa-location-arrow"></i> GPS</button></div>
-            <input type="text" id="start" class="k-input addr" placeholder="Adresse de départ" autocomplete="off">
+            <div class="flex justify-between mb-2 px-1">
+                <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Départ</label>
+                <button onclick="getCurrentLocation()" class="text-yellow-500 text-[10px] font-black uppercase"><i class="fas fa-crosshairs"></i> GPS</button>
+            </div>
+            <div class="input-wrap">
+                <i class="fas fa-circle text-[8px] text-yellow-500 mx-5"></i>
+                <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ" autocomplete="off">
+            </div>
             <div class="suggestion-box"></div>
         </div>
 
-        <div id="extra-stops" class="space-y-4"></div>
-        <button onclick="addStop()" class="text-[10px] font-black text-gray-500 uppercase opacity-50">+ Ajouter une étape</button>
+        <div id="stopsContainer" class="space-y-4"></div>
+        <button onclick="addStop()" class="text-[10px] font-black text-gray-500 uppercase flex items-center gap-2"><i class="fas fa-plus-circle text-yellow-500"></i> Ajouter une étape</button>
 
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1">Destination</label>
-            <input type="text" id="end" class="k-input addr" placeholder="Où allez-vous ?" autocomplete="off">
+            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1 tracking-widest">Destination</label>
+            <div class="input-wrap">
+                <i class="fas fa-location-dot text-gray-500 mx-5 text-sm"></i>
+                <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?" autocomplete="off">
+            </div>
             <div class="suggestion-box"></div>
         </div>
 
         <div>
-            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1">Téléphone</label>
-            <input type="tel" id="tel" class="k-input" placeholder="06 00 00 00 00" maxlength="10">
+            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1 tracking-widest">Mobile</label>
+            <div class="input-wrap">
+                <i class="fas fa-phone text-gray-500 mx-5 text-sm"></i>
+                <input type="tel" id="phoneInput" placeholder="06 00 00 00 00" maxlength="10">
+            </div>
         </div>
 
-        <button onclick="calculer()" class="w-full btn-gold py-6 rounded-3xl font-black tracking-widest shadow-xl">Vérifier le Tarif</button>
+        <button onclick="calculate()" class="w-full btn-main py-6 rounded-[28px] text-sm shadow-xl">Calculer le Tarif Fixe</button>
 
-        <div id="price-box" class="hidden bg-white text-black p-8 rounded-[45px] text-center shadow-inner animate-[fadeIn_0.5s]">
-            <p class="text-[10px] font-black opacity-30 uppercase tracking-[4px] mb-2">Prix Fixe Garanti</p>
-            <div class="text-7xl font-black tracking-tighter" id="p-display">-- €</div>
-            <button onclick="valider()" id="btn-val" class="w-full bg-black text-white py-6 rounded-[30px] font-black mt-8 uppercase tracking-widest">Réserver KLAK</button>
+        <div id="result" class="hidden mt-6 bg-white text-black p-8 rounded-[40px] text-center shadow-2xl animate-[snapIn_0.4s]">
+            <div class="text-[10px] font-black opacity-30 uppercase tracking-[4px] mb-2">Prix Fixe</div>
+            <div class="text-7xl font-black tracking-tighter" id="pVal">-- €</div>
+            <div class="text-[11px] font-bold opacity-30 mt-2" id="infoVal">-- KM</div>
+            
+            <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-6 rounded-[30px] font-black mt-8 uppercase tracking-widest flex items-center justify-center gap-3">
+                <i class="fas fa-bolt text-yellow-500"></i> RÉSERVER MAINTENANT
+            </button>
         </div>
     </main>
 
     <script>
-        // Masquer le loader
-        window.onload = () => { setTimeout(() => { document.getElementById('klak-loader').style.opacity = '0'; setTimeout(() => { document.getElementById('klak-loader').style.display = 'none'; }, 800); }, 1500); };
+        let allCoords = { start: null, end: null };
+        const botToken = "8548242544:AAEBmzM8-wj0AHtaWVpkgmKoLq_Y9btfbCQ";
+        const chatId = "-1003529719062";
 
-        let coords = { start: null, end: null };
-        const TOKEN = "8548242544:AAEBmzM8-wj0AHtaWVpkgmKoLq_Y9btfbCQ";
-        const CHAT = "-1003529719062";
-
-        async function getGPS() {
+        async function getCurrentLocation() {
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                coords.start = [pos.coords.longitude, pos.coords.latitude];
-                const r = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${coords.start[0]}&lat=${coords.start[1]}`);
+                const { latitude: lat, longitude: lon } = pos.coords;
+                allCoords.start = [lon, lat];
+                const r = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`);
                 const d = await r.json();
-                document.getElementById('start').value = d.features[0]?.properties.label || "Ma position";
+                document.getElementById('startInput').value = d.features[0]?.properties.label || "Ma position";
             });
         }
 
-        function setupAuto() {
-            document.querySelectorAll('.addr').forEach(el => {
-                const box = el.nextElementSibling;
+        function initAutocomplete() {
+            document.querySelectorAll('.addr-input').forEach(el => {
+                const box = el.parentElement.nextElementSibling;
                 el.oninput = async () => {
                     if(el.value.length < 3) return;
                     const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=5`);
@@ -142,55 +131,62 @@
                     box.querySelectorAll('.suggestion-item').forEach((item, i) => {
                         item.onclick = () => {
                             el.value = d.features[i].properties.label;
-                            if(el.id === 'start') coords.start = d.features[i].geometry.coordinates;
-                            if(el.id === 'end') coords.end = d.features[i].geometry.coordinates;
+                            if(el.id === 'startInput') allCoords.start = d.features[i].geometry.coordinates;
+                            if(el.id === 'endInput') allCoords.end = d.features[i].geometry.coordinates;
                             box.style.display = 'none';
                         };
                     });
                 };
             });
         }
-        setupAuto();
+        initAutocomplete();
 
         function addStop() {
             const div = document.createElement('div');
             div.className = 'relative mt-2';
-            div.innerHTML = `<input type="text" class="k-input addr" placeholder="Adresse étape"><div class="suggestion-box"></div>`;
-            document.getElementById('extra-stops').appendChild(div);
-            setupAuto();
+            div.innerHTML = `<div class="input-wrap"><i class="fas fa-ellipsis-v text-gray-500 mx-6 text-[10px]"></i><input type="text" class="addr-input stop-input" placeholder="Adresse étape"><button onclick="this.parentElement.parentElement.remove()" class="pr-5 text-red-500 text-xs uppercase font-black">Effacer</button></div><div class="suggestion-box"></div>`;
+            document.getElementById('stopsContainer').appendChild(div);
+            initAutocomplete();
         }
 
-        function calculer() {
-            if(!coords.start) return alert("Position GPS requise");
-            const c1 = coords.start, c2 = coords.end || [2.35, 48.85];
+        function calculate() {
+            if(!allCoords.start || !allCoords.end) return alert("Indiquez le départ et l'arrivée");
+            const c1 = allCoords.start, c2 = allCoords.end;
             const dist = (Math.sqrt(Math.pow(c2[0]-c1[0], 2) + Math.pow(c2[1]-c1[1], 2)) * 111) * 1.4;
-            const price = Math.ceil(Math.max(15, 5 + (dist * 1.9)));
-            document.getElementById('p-display').innerText = price + " €";
-            document.getElementById('price-box').classList.remove('hidden');
+            const price = Math.ceil(Math.max(15, 5 + (dist * 1.8)));
+            document.getElementById('pVal').innerText = price + " €";
+            document.getElementById('infoVal').innerText = dist.toFixed(1) + " KM ENV.";
+            document.getElementById('result').classList.remove('hidden');
         }
 
-        function valider() {
-            const tel = document.getElementById('tel').value;
-            const s = document.getElementById('start').value;
-            const e = document.getElementById('end').value;
-            const p = document.getElementById('p-display').innerText;
+        function send() {
+            const tel = document.getElementById('phoneInput').value;
+            const s = document.getElementById('startInput').value;
+            const e = document.getElementById('endInput').value;
+            const p = document.getElementById('pVal').innerText;
+            const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v);
 
-            if(!tel || tel.length < 10) return alert("Mobile requis");
+            if(!tel || tel.length < 10) return alert("Numéro de mobile requis");
 
-            document.getElementById('btn-val').innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENVOI...';
+            let msg = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n`;
+            msg += `📞 *CLIENT :* [${tel}](tel:${tel})\n`;
+            msg += `📍 *DÉPART :* ${s}\n`;
+            if(stops.length) msg += `🛑 *ÉTAPES :* ${stops.join(' / ')}\n`;
+            msg += `🏁 *VERS :* ${e}\n`;
+            msg += `💰 *TARIF : ${p}*`;
 
-            const texte = `🚕 NOUVELLE COURSE KLAK\n\nTEL: ${tel}\nDE: ${s}\nVERS: ${e}\nPRIX: ${p}`;
-            const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT}&text=${encodeURIComponent(texte)}`;
+            const keyboard = {
+                inline_keyboard: [[
+                    { text: "📞 APPELER LE CLIENT", url: "tel:" + tel }
+                ]]
+            };
 
-            // METHODE FORCE BRUTE (Impossible à bloquer)
-            const win = window.open(url, '_blank', 'width=1,height=1,left=-1000');
-            
-            setTimeout(() => {
-                if(win) win.close();
-                document.getElementById('final-p').innerText = p;
-                document.getElementById('success-modal').style.display = 'flex';
-                document.getElementById('invoice-card').classList.add('show-invoice');
-            }, 1000);
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown&reply_markup=${JSON.stringify(keyboard)}`;
+
+            fetch(url).then(() => {
+                document.getElementById('invPrice').innerText = p;
+                document.getElementById('invoiceModal').style.display = 'flex';
+            });
         }
     </script>
 </body>
