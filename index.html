@@ -3,70 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLAK - Réservation VTC</title>
+    <title>KLAK - VTC Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #000000; color: white; font-family: sans-serif; }
-        .klak-card { background: #111; border: 1px solid #333; border-radius: 20px; }
-        .suggestion-box { position: absolute; z-index: 100; width: 100%; background: white; color: black; border-radius: 8px; display: none; max-height: 200px; overflow-y: auto; }
-        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; }
-        .suggestion-item:hover { background: #f0f0f0; }
-        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        body { background: radial-gradient(circle at top, #1a1a1a 0%, #000000 100%); color: white; min-height: screen; font-family: 'Segoe UI', Roboto, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
+        .suggestion-box { position: absolute; z-index: 100; width: 100%; background: white; color: black; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        .suggestion-item { padding: 14px; cursor: pointer; border-bottom: 1px solid #f1f1f1; font-size: 14px; transition: 0.2s; }
+        .suggestion-item:hover { background: #fbbf24; color: black; }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.5; }
     </style>
 </head>
-<body class="p-4 flex flex-col items-center min-h-screen">
+<body class="p-4 md:p-8 flex flex-col items-center">
 
-    <h1 class="text-5xl font-black italic mb-8 tracking-tighter">KLAK</h1>
+    <h1 class="text-6xl font-black italic mb-2 tracking-tighter text-white">KLAK</h1>
+    <p class="text-yellow-500 font-bold uppercase tracking-[0.3em] text-[10px] mb-8">Service Chauffeur Privé</p>
 
-    <div class="klak-card w-full max-w-md p-6 space-y-6">
-        <div class="space-y-4">
-            <div class="relative">
-                <label class="text-yellow-400 text-[10px] uppercase font-bold">Lieu de départ</label>
-                <input type="text" id="startInput" placeholder="Saisir l'adresse..." class="bg-transparent border-b border-gray-700 w-full py-2 outline-none text-sm">
-                <div id="startSuggest" class="suggestion-box"></div>
+    <div class="glass w-full max-w-lg p-6 md:p-8 space-y-6 shadow-2xl">
+        
+        <div id="route-points" class="space-y-4">
+            <div class="relative group">
+                <label class="text-yellow-500 text-[10px] uppercase font-bold ml-1">Point de départ</label>
+                <div class="flex items-center bg-white/5 rounded-xl px-4 py-3 border border-transparent group-focus-within:border-yellow-500/50 transition">
+                    <i class="fa-solid fa-location-dot text-gray-500 mr-3"></i>
+                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Saisir l'adresse de départ..." data-type="start">
+                </div>
+                <div class="suggestion-box"></div>
             </div>
 
-            <div class="relative">
-                <label class="text-yellow-400 text-[10px] uppercase font-bold">Destination</label>
-                <input type="text" id="endInput" placeholder="Où allez-vous ?" class="bg-transparent border-b border-gray-700 w-full py-2 outline-none text-sm">
-                <div id="endSuggest" class="suggestion-box"></div>
+            <div id="steps-container" class="space-y-4"></div>
+
+            <button onclick="addStep()" class="text-yellow-500 text-xs font-bold flex items-center gap-2 hover:text-white transition px-1">
+                <i class="fa-solid fa-plus-circle"></i> Ajouter un arrêt (étape)
+            </button>
+
+            <div class="relative group">
+                <label class="text-yellow-500 text-[10px] uppercase font-bold ml-1">Destination finale</label>
+                <div class="flex items-center bg-white/5 rounded-xl px-4 py-3 border border-transparent group-focus-within:border-yellow-500/50 transition">
+                    <i class="fa-solid fa-flag-checkered text-gray-500 mr-3"></i>
+                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Où allez-vous ?" data-type="end">
+                </div>
+                <div class="suggestion-box"></div>
             </div>
         </div>
 
-        <div>
-            <label class="text-yellow-400 text-[10px] uppercase font-bold">Heure de départ</label>
-            <input type="datetime-local" id="timeInput" class="bg-transparent border-b border-gray-700 w-full py-2 outline-none text-sm text-white">
+        <div class="group">
+            <label class="text-yellow-500 text-[10px] uppercase font-bold ml-1">Heure de prise en charge</label>
+            <div class="flex items-center bg-white/5 rounded-xl px-4 py-3 border border-transparent group-focus-within:border-yellow-500/50 transition">
+                <i class="fa-solid fa-calendar-day text-gray-500 mr-3"></i>
+                <input type="datetime-local" id="timeInput" class="bg-transparent w-full outline-none text-sm text-white">
+            </div>
         </div>
 
-        <button onclick="calculateRide()" class="w-full bg-yellow-400 text-black font-black py-4 rounded-xl shadow-lg">
-            CALCULER LE PRIX
+        <button onclick="calculateFullRide()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-5 rounded-2xl shadow-[0_0_30px_rgba(251,191,36,0.2)] transition-all active:scale-95 uppercase tracking-widest text-sm">
+            Estimer le prix du trajet
         </button>
 
-        <div id="priceDisplay" class="hidden border-2 border-yellow-400 p-4 rounded-2xl text-center bg-yellow-400/5">
-            <p class="text-gray-400 text-xs">Distance : <span id="distVal">0</span> km</p>
-            <p class="text-4xl font-black text-white" id="priceVal">-- €</p>
+        <div id="priceDisplay" class="hidden glass bg-yellow-500/10 border-yellow-500/30 p-6 rounded-3xl text-center space-y-1">
+            <p class="text-gray-400 text-[10px] uppercase font-bold tracking-widest">Estimation totale</p>
+            <p class="text-5xl font-black text-white" id="priceVal">-- €</p>
+            <p class="text-yellow-500/60 text-[10px]" id="distDetail">0 km de trajet</p>
         </div>
 
-        <div id="orderZone" class="hidden space-y-4">
-            <p class="text-center text-[10px] text-gray-500 uppercase font-bold">Envoyer au chauffeur</p>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="sendToWA('336XXXXXXXX')" class="bg-white text-black p-4 rounded-xl font-bold text-sm">Chauffeur 1</button>
-                <button onclick="sendToWA('336XXXXXXXX')" class="bg-white text-black p-4 rounded-xl font-bold text-sm">Chauffeur 2</button>
+        <div id="orderZone" class="hidden space-y-4 pt-2">
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="sendWA('336XXXXXXXX')" class="bg-white text-black p-5 rounded-2xl font-black text-xs hover:bg-gray-200 transition flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-user-tie text-lg"></i> CHAUFFEUR 1
+                </button>
+                <button onclick="sendWA('336XXXXXXXX')" class="bg-white text-black p-5 rounded-2xl font-black text-xs hover:bg-gray-200 transition flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-user-tie text-lg"></i> CHAUFFEUR 2
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        let coords = { start: null, end: null };
+        let routeCoords = { start: null, end: null, steps: [] };
 
-        // Autocomplétion
-        function initAuto(inputId, suggestId, type) {
-            const input = document.getElementById(inputId);
-            const suggest = document.getElementById(suggestId);
-            input.addEventListener('input', async () => {
-                if (input.value.length < 3) { suggest.style.display = 'none'; return; }
-                const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(input.value)}&limit=5`);
+        function initInput(el) {
+            const suggest = el.parentElement.nextElementSibling;
+            el.addEventListener('input', async () => {
+                if (el.value.length < 3) { suggest.style.display = 'none'; return; }
+                const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=5`);
                 const data = await res.json();
                 suggest.innerHTML = '';
                 data.features.forEach(f => {
@@ -74,8 +93,14 @@
                     div.className = 'suggestion-item';
                     div.innerText = f.properties.label;
                     div.onclick = () => {
-                        input.value = f.properties.label;
-                        coords[type] = f.geometry.coordinates;
+                        el.value = f.properties.label;
+                        const type = el.getAttribute('data-type');
+                        if(type === 'start') routeCoords.start = f.geometry.coordinates;
+                        else if(type === 'end') routeCoords.end = f.geometry.coordinates;
+                        else {
+                            const idx = el.getAttribute('data-index');
+                            routeCoords.steps[idx] = f.geometry.coordinates;
+                        }
                         suggest.style.display = 'none';
                     };
                     suggest.appendChild(div);
@@ -83,37 +108,67 @@
                 suggest.style.display = 'block';
             });
         }
-        initAuto('startInput', 'startSuggest', 'start');
-        initAuto('endInput', 'endSuggest', 'end');
 
-        // Calcul du prix (Tes règles)
-        function calculateRide() {
-            if (!coords.start || !coords.end) { alert("Sélectionnez les adresses !"); return; }
-            const lat1 = coords.start[1], lon1 = coords.start[0];
-            const lat2 = coords.end[1], lon2 = coords.end[0];
-            const dist = Math.sqrt(Math.pow(lat2-lat1, 2) + Math.pow(lon2-lon1, 2)) * 111 * 1.25;
+        // Initialisation des champs par défaut
+        document.querySelectorAll('.addr-input').forEach(initInput);
+
+        function addStep() {
+            const container = document.getElementById('steps-container');
+            const index = routeCoords.steps.length;
+            routeCoords.steps.push(null);
             
-            // Moins de 5km = 10€, sinon 3€ + 1.30€/km
-            let prix = dist < 5 ? 10 : 3 + (dist * 1.3);
+            const div = document.createElement('div');
+            div.className = 'relative group';
+            div.innerHTML = `
+                <label class="text-yellow-500/70 text-[10px] uppercase font-bold ml-1">Arrêt intermédiaire</label>
+                <div class="flex items-center bg-white/5 rounded-xl px-4 py-3 border border-transparent group-focus-within:border-yellow-500/50 transition">
+                    <i class="fa-solid fa-pause text-gray-600 mr-3 text-xs"></i>
+                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Adresse de l'arrêt..." data-type="step" data-index="${index}">
+                    <button onclick="this.parentElement.parentElement.remove(); routeCoords.steps[${index}]=null;" class="text-gray-600 hover:text-red-500 ml-2"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="suggestion-box"></div>
+            `;
+            container.appendChild(div);
+            initInput(div.querySelector('.addr-input'));
+        }
+
+        function calculateDistance(c1, c2) {
+            return Math.sqrt(Math.pow(c2[1]-c1[1], 2) + Math.pow(c2[0]-c1[0], 2)) * 111 * 1.3;
+        }
+
+        function calculateFullRide() {
+            if(!routeCoords.start || !routeCoords.end) { alert("Veuillez saisir au moins le départ et l'arrivée."); return; }
             
-            document.getElementById('distVal').innerText = dist.toFixed(1);
+            let totalDist = 0;
+            let currentPos = routeCoords.start;
+            
+            // Calcul via les étapes
+            routeCoords.steps.forEach(s => { if(s) { totalDist += calculateDistance(currentPos, s); currentPos = s; } });
+            // Vers l'arrivée finale
+            totalDist += calculateDistance(currentPos, routeCoords.end);
+            
+            let prix = totalDist < 5 ? 10 : 3 + (totalDist * 1.3);
+            
+            document.getElementById('distDetail').innerText = totalDist.toFixed(1) + " km de trajet total";
             document.getElementById('priceVal').innerText = Math.ceil(prix) + " €";
             document.getElementById('priceDisplay').classList.remove('hidden');
             document.getElementById('orderZone').classList.remove('hidden');
         }
 
-        // WhatsApp
-        function sendToWA(num) {
-            const start = document.getElementById('startInput').value;
-            const end = document.getElementById('endInput').value;
+        function sendWA(num) {
+            const inputs = document.querySelectorAll('.addr-input');
+            let trajet = `📍 DEPART : ${inputs[0].value}%0A`;
+            for(let i=1; i < inputs.length - 1; i++) { if(inputs[i].value) trajet += `🛑 ARRET : ${inputs[i].value}%0A`; }
+            trajet += `🏁 ARRIVEE : ${inputs[inputs.length-1].value}`;
+            
             const prix = document.getElementById('priceVal').innerText;
             const time = document.getElementById('timeInput').value.replace('T', ' à ');
-            const text = `🚕 *KLAK - Nouvelle Course*%0A📅 *HEURE :* ${time}%0A📍 *DEPART :* ${start}%0A🏁 *ARRIVEE :* ${end}%0A💰 *PRIX :* ${prix}`;
-            window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+            const msg = `🚕 *NOUVELLE COURSE KLAK*%0A%0A📅 *HEURE :* ${time}%0A${trajet}%0A%0A💰 *PRIX ESTIMÉ : ${prix}*`;
+            window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
         }
 
-        // Heure actuelle par défaut
         document.getElementById('timeInput').value = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     </script>
 </body>
 </html>
+
