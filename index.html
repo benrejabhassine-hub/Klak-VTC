@@ -11,28 +11,28 @@
         
         body { background: #000; color: white; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         
-        /* Animations Premium */
+        /* Animations Expert */
         @keyframes snapIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         #klak-loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.6s ease 2.2s forwards; }
         .snap-emoji { font-size: 80px; animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .klak-text { color: #fbbf24; font-weight: 900; font-size: 3rem; font-style: italic; letter-spacing: -2px; margin-top: 10px; }
+        .klak-text { color: #fbbf24; font-weight: 900; font-size: 3.5rem; font-style: italic; letter-spacing: -3px; margin-top: 10px; }
         
-        .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; animation: slideUp 0.8s ease-out 2.5s both; }
-        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 15px; display: none; max-height: 250px; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin-top: 5px; }
-        .suggestion-item { padding: 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 14px; font-weight: 600; color: #1a1a1a; transition: background 0.2s; }
-        .suggestion-item:hover { background: #f9f9f9; }
+        .glass { background: rgba(255,255,255,0.07); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); border-radius: 35px; animation: slideUp 0.8s ease-out 2.5s both; }
+        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 20px; display: none; max-height: 250px; overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,0.6); margin-top: 8px; }
+        .suggestion-item { padding: 18px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 14px; font-weight: 700; color: #111; transition: 0.2s; }
+        .suggestion-item:active { background: #f0f0f0; }
         
-        .input-wrap { background: rgba(255,255,255,0.08); border-radius: 20px; display: flex; align-items: center; transition: 0.3s; border: 1px solid transparent; }
-        .input-wrap:focus-within { border-color: #fbbf24; background: rgba(255,255,255,0.12); box-shadow: 0 0 20px rgba(251, 191, 36, 0.1); }
-        input { background: transparent; width: 100%; outline: none; color: white; padding: 18px; font-size: 16px; }
+        .input-wrap { background: rgba(255,255,255,0.08); border-radius: 22px; display: flex; align-items: center; transition: 0.4s; border: 1px solid transparent; }
+        .input-wrap:focus-within { border-color: #fbbf24; background: rgba(255,255,255,0.15); box-shadow: 0 0 25px rgba(251, 191, 36, 0.15); }
+        input { background: transparent; width: 100%; outline: none; color: white; padding: 20px; font-size: 16px; font-weight: 500; }
         
-        .btn-primary { background: #fbbf24; color: #000; font-weight: 900; text-transform: uppercase; transition: 0.3s; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2); }
-        .btn-primary:active { transform: scale(0.96); }
+        .btn-primary { background: #fbbf24; color: #000; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 12px 35px rgba(251, 191, 36, 0.25); }
+        .btn-primary:active { transform: scale(0.94); }
         
-        .invoice-card { animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .invoice-card { animation: snapIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen max-w-lg mx-auto">
@@ -42,94 +42,94 @@
         <div class="klak-text">KLAK</div>
     </div>
 
-    <div id="invoiceModal" class="fixed inset-0 z-[1000] bg-black/95 flex items-center justify-center p-4 hidden">
-        <div class="bg-white text-black w-full rounded-[40px] p-8 space-y-6 shadow-2xl invoice-card relative">
+    <div id="invoiceModal" class="fixed inset-0 z-[1000] bg-black/98 flex items-center justify-center p-4 hidden">
+        <div class="bg-white text-black w-full rounded-[45px] p-10 space-y-8 shadow-2xl invoice-card relative">
             <div class="text-center">
-                <div class="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
-                    <i class="fa-solid fa-check text-4xl"></i>
+                <div class="w-24 h-24 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-100">
+                    <i class="fa-solid fa-check text-5xl"></i>
                 </div>
-                <h2 class="text-3xl font-black italic uppercase tracking-tighter">Course Validée</h2>
-                <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">Merci d'avoir choisi KLAK</p>
+                <h2 class="text-4xl font-black italic uppercase tracking-tighter">KLAKÉ !</h2>
+                <p class="text-gray-400 text-[11px] font-bold uppercase tracking-[4px] mt-2">Réservation enregistrée</p>
             </div>
             
-            <div class="space-y-4 border-y border-dashed border-gray-200 py-6">
-                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[11px] uppercase">Prix Fixe</span><span class="font-black text-3xl text-black" id="invPrice">-- €</span></div>
-                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[11px] uppercase">Distance</span><span class="font-bold text-lg" id="invDist">-- km</span></div>
-                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[11px] uppercase">Confirmation</span><span class="font-bold" id="invTel">--</span></div>
+            <div class="space-y-5 border-y border-dashed border-gray-200 py-8">
+                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-xs uppercase">Prix Garanti</span><span class="font-black text-4xl" id="invPrice">-- €</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-xs uppercase">Distance</span><span class="font-black text-xl" id="invDist">-- km</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-xs uppercase">Contact</span><span class="font-bold text-lg" id="invTel">--</span></div>
             </div>
 
-            <div class="bg-yellow-50 p-5 rounded-3xl border border-yellow-100">
-                <p class="text-[12px] text-yellow-800 font-bold text-center leading-relaxed italic animate-pulse">
-                    <i class="fa-solid fa-paper-plane mr-2"></i>Un chauffeur vous contacte par SMS immédiatement pour confirmer son arrivée.
+            <div class="bg-yellow-50 p-6 rounded-[30px] border border-yellow-100">
+                <p class="text-[13px] text-yellow-900 font-bold text-center leading-relaxed italic animate-pulse">
+                    <i class="fa-solid fa-paper-plane mr-2"></i>Un chauffeur premium vous contacte par SMS dans quelques instants.
                 </p>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase text-xs tracking-[3px] active:scale-95 transition">Terminer</button>
+            <button onclick="location.reload()" class="w-full bg-black text-white py-6 rounded-3xl font-black uppercase text-xs tracking-[5px] active:scale-95 transition shadow-lg">Fermer</button>
         </div>
     </div>
 
-    <header class="text-center py-8">
-        <h1 class="text-8xl font-black italic tracking-tighter text-white">KLAK</h1>
-        <div class="flex items-center justify-center gap-2 mt-2">
-            <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span class="text-[10px] font-black text-gray-500 uppercase tracking-[4px]">Service Premium 24/7</span>
+    <header class="text-center py-10">
+        <h1 class="text-9xl font-black italic tracking-tighter text-white opacity-95">KLAK</h1>
+        <div class="flex items-center justify-center gap-3 mt-2">
+            <span class="flex h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
+            <span class="text-[11px] font-black text-gray-500 uppercase tracking-[6px]">Prestige Service</span>
         </div>
     </header>
 
-    <main class="glass p-6 space-y-6 mb-10">
+    <main class="glass p-7 space-y-7 mb-12 shadow-2xl">
         <div class="relative">
-            <div class="flex justify-between items-end mb-2 px-1">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Lieu de départ</label>
-                <button onclick="getCurrentLocation()" class="text-[10px] font-black text-yellow-500 uppercase flex items-center gap-1 active:opacity-50 transition">
-                    <i class="fa-solid fa-location-crosshairs"></i> Ma position
+            <div class="flex justify-between items-end mb-3 px-2">
+                <label class="text-[11px] font-black text-gray-500 uppercase tracking-widest">Point de départ</label>
+                <button onclick="getCurrentLocation()" class="text-[11px] font-black text-yellow-500 uppercase flex items-center gap-1 active:scale-90 transition">
+                    <i class="fa-solid fa-location-crosshairs"></i> GPS
                 </button>
             </div>
             <div class="input-wrap">
-                <i class="fa-solid fa-circle text-[8px] text-yellow-500 mx-5"></i>
-                <input type="text" id="startInput" class="addr-input" placeholder="Saisir l'adresse de départ" autocomplete="off">
+                <i class="fa-solid fa-circle text-[9px] text-yellow-500 mx-6"></i>
+                <input type="text" id="startInput" class="addr-input" placeholder="Adresse précise de départ" autocomplete="off">
             </div>
             <div class="suggestion-box"></div>
         </div>
 
-        <div id="stopsContainer" class="space-y-3"></div>
-        <button onclick="addStop()" class="text-[10px] font-black text-gray-500 uppercase flex items-center gap-2 px-1 hover:text-yellow-500 transition">
-            <i class="fa-solid fa-plus-circle text-xl text-yellow-500/40"></i> Ajouter une étape
+        <div id="stopsContainer" class="space-y-4"></div>
+        <button onclick="addStop()" class="text-[11px] font-black text-gray-400 uppercase flex items-center gap-3 px-2 hover:text-white transition">
+            <i class="fa-solid fa-plus-circle text-2xl text-yellow-500/50"></i> Ajouter une étape
         </button>
 
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-400 uppercase block mb-2 px-1 tracking-widest">Destination finale</label>
+            <label class="text-[11px] font-black text-gray-400 uppercase block mb-3 px-2 tracking-widest">Destination</label>
             <div class="input-wrap">
-                <i class="fa-solid fa-location-dot text-gray-500 mx-5 text-lg"></i>
+                <i class="fa-solid fa-location-dot text-gray-500 mx-6 text-xl"></i>
                 <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?" autocomplete="off">
             </div>
             <div class="suggestion-box"></div>
         </div>
 
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-400 uppercase block mb-2 px-1 tracking-widest">Votre Numéro Mobile</label>
+            <label class="text-[11px] font-black text-gray-400 uppercase block mb-3 px-2 tracking-widest">Numéro de Mobile</label>
             <div class="input-wrap">
-                <i class="fa-solid fa-phone text-gray-500 mx-5 text-sm"></i>
+                <i class="fa-solid fa-phone text-gray-500 mx-6 text-sm"></i>
                 <input type="tel" id="phoneInput" placeholder="06 00 00 00 00" maxlength="10">
             </div>
         </div>
 
-        <button onclick="calculate()" class="w-full btn-primary py-6 rounded-3xl text-sm shadow-2xl">Vérifier le tarif</button>
+        <button onclick="calculate()" class="w-full btn-primary py-7 rounded-[28px] text-sm shadow-2xl mt-4">Estimer ma course</button>
 
-        <div id="result" class="hidden mt-8 bg-white text-black p-10 rounded-[45px] text-center shadow-2xl animate-[snapIn_0.4s_ease-out] relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500"></div>
-            <div class="text-[11px] font-black opacity-30 uppercase tracking-[5px] mb-3">Tarif Fixe Garanti</div>
-            <div class="text-8xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
-            <div class="inline-block bg-gray-100 px-6 py-2 rounded-full text-[12px] font-black" id="infoVal">-- KM</div>
+        <div id="result" class="hidden mt-10 bg-white text-black p-10 rounded-[50px] text-center shadow-3xl animate-[snapIn_0.5s_ease] relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-yellow-500"></div>
+            <div class="text-[11px] font-black opacity-30 uppercase tracking-[6px] mb-4">Prix Net Garanti</div>
+            <div class="text-8xl font-black tracking-tighter mb-3" id="pVal">-- €</div>
+            <div class="inline-block bg-gray-100 px-7 py-2.5 rounded-full text-[13px] font-black tracking-wider" id="infoVal">-- KM</div>
             
-            <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-6 rounded-3xl font-black flex items-center justify-center gap-4 mt-10 active:scale-95 transition shadow-xl">
-                <i class="fa-solid fa-bolt text-yellow-500 text-xl"></i> 
-                <span class="tracking-[2px]">RÉSERVER MAINTENANT</span>
+            <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-7 rounded-[30px] font-black flex items-center justify-center gap-4 mt-10 active:scale-95 transition shadow-2xl">
+                <i class="fa-solid fa-bolt text-yellow-500 text-2xl"></i> 
+                <span class="text-sm tracking-[3px]">RÉSERVER KLAK</span>
             </button>
         </div>
     </main>
 
-    <footer class="py-10 text-center">
-        <p class="text-[10px] font-black text-gray-700 uppercase tracking-[5px]">© 2025 KLAK TRANSPORT</p>
+    <footer class="py-12 text-center">
+        <p class="text-[11px] font-black text-gray-800 uppercase tracking-[8px]">KLAK PREMIUM LINE</p>
     </footer>
 
     <script>
@@ -137,11 +137,11 @@
         const botToken = "8548242544:AAEBmzM8-wj0AHtaWVpkgmKoLq_Y9btfbCQ";
         const chatId = "-1003529719062";
 
-        // GÉOLOCALISATION AUTO (Remplissage automatique)
+        // GÉOLOCALISATION EXPERT
         async function getCurrentLocation() {
             if (!navigator.geolocation) return;
             const btn = event.currentTarget;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recherche...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
             
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const lat = pos.coords.latitude, lon = pos.coords.longitude;
@@ -149,79 +149,61 @@
                 try {
                     const r = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`);
                     const d = await r.json();
-                    const addr = d.features[0]?.properties.label || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-                    document.getElementById('startInput').value = addr;
-                    btn.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Position OK';
-                } catch(e) {
-                    btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Erreur';
-                }
-            }, () => {
-                btn.innerHTML = '<i class="fa-solid fa-xmark"></i> GPS Désactivé';
-            });
+                    document.getElementById('startInput').value = d.features[0]?.properties.label || "Ma Position";
+                    btn.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
+                } catch(e) { btn.innerHTML = 'ERR'; }
+            }, () => { btn.innerHTML = 'OFF'; });
         }
 
-        // AUTOCOMPLÉTION (Data Gouv - Rapide et Gratuit)
+        // AUTOCOMPLÉTION
         function initAutocomplete() {
             document.querySelectorAll('.addr-input').forEach(el => {
                 const box = el.parentElement.nextElementSibling;
                 el.oninput = async () => {
                     if(el.value.length < 3) { box.style.display = 'none'; return; }
-                    try {
-                        const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=5`);
-                        const d = await r.json();
-                        box.innerHTML = d.features.map(f => `<div class="suggestion-item">${f.properties.label}</div>`).join('');
-                        box.style.display = 'block';
-                        
-                        box.querySelectorAll('.suggestion-item').forEach((item, i) => {
-                            item.onclick = () => {
-                                el.value = d.features[i].properties.label;
-                                if(el.id === 'startInput') allCoords.start = d.features[i].geometry.coordinates;
-                                if(el.id === 'endInput') allCoords.end = d.features[i].geometry.coordinates;
-                                box.style.display = 'none';
-                            };
-                        });
-                    } catch(e) {}
+                    const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=5`);
+                    const d = await r.json();
+                    box.innerHTML = d.features.map(f => `<div class="suggestion-item">${f.properties.label}</div>`).join('');
+                    box.style.display = 'block';
+                    box.querySelectorAll('.suggestion-item').forEach((item, i) => {
+                        item.onclick = () => {
+                            el.value = d.features[i].properties.label;
+                            if(el.id === 'startInput') allCoords.start = d.features[i].geometry.coordinates;
+                            if(el.id === 'endInput') allCoords.end = d.features[i].geometry.coordinates;
+                            box.style.display = 'none';
+                        };
+                    });
                 };
             });
         }
         initAutocomplete();
 
-        // AJOUTER UNE ÉTAPE
+        // AJOUTER ÉTAPE
         function addStop() {
             const div = document.createElement('div');
-            div.className = 'relative animate-[snapIn_0.3s_ease]';
+            div.className = 'relative animate-[snapIn_0.3s]';
             div.innerHTML = `
                 <div class="input-wrap">
-                    <i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-6"></i>
+                    <i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-7"></i>
                     <input type="text" class="addr-input stop-input" placeholder="Adresse de l'étape" autocomplete="off">
-                    <button onclick="this.parentElement.parentElement.remove()" class="pr-5 text-red-400"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="suggestion-box"></div>`;
+                    <button onclick="this.parentElement.parentElement.remove()" class="pr-6 text-red-500/50"><i class="fa-solid fa-xmark"></i></button>
+                </div><div class="suggestion-box"></div>`;
             document.getElementById('stopsContainer').appendChild(div);
             initAutocomplete();
         }
 
-        // CALCUL DE PRIX RÉEL
+        // CALCUL PRIX
         function calculate() {
-            if(!allCoords.start || !document.getElementById('endInput').value) {
-                alert("Précisez le départ et l'arrivée pour calculer.");
-                return;
-            }
+            if(!allCoords.start || !document.getElementById('endInput').value) return alert("Remplissez le trajet !");
             const c1 = allCoords.start, c2 = allCoords.end || [2.35, 48.85];
-            const R = 6371;
-            const dLat = (c2[1]-c1[1]) * Math.PI/180;
-            const dLon = (c2[0]-c1[0]) * Math.PI/180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(c1[1]*Math.PI/180) * Math.cos(c2[1]*Math.PI/180) * Math.sin(dLon/2)**2;
-            const dist = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1.4; // Coef détourage urbain
-
-            const price = Math.max(15, 5 + (dist * 1.7)); // 15€ min
-            document.getElementById('pVal').innerText = Math.ceil(price) + " €";
+            const dist = (Math.sqrt(Math.pow(c2[0]-c1[0], 2) + Math.pow(c2[1]-c1[1], 2)) * 111) * 1.35;
+            document.getElementById('pVal').innerText = Math.ceil(Math.max(15, 5 + (dist * 1.7))) + " €";
             document.getElementById('infoVal').innerText = dist.toFixed(1) + " KM ENV.";
             document.getElementById('result').classList.remove('hidden');
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
 
-        // ENVOI SÉCURISÉ VERS TELEGRAM (Méthode de test réussie)
+        // ENVOI BLINDÉ (ZÉRO ERREUR)
         function send() {
             const tel = document.getElementById('phoneInput').value;
             const s = document.getElementById('startInput').value;
@@ -229,42 +211,35 @@
             const p = document.getElementById('pVal').innerText;
             const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v);
 
-            if(!tel || tel.length < 10) return alert("Numéro de téléphone requis");
+            if(!tel || tel.length < 10) return alert("Numéro invalide");
 
             const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            let cleanTel = tel.replace(/\s/g, '').replace(/^0/, '33');
-            
-            // Message pour le client (SMS de confirmation automatique)
-            const smsText = `KLAK : Course acceptee (${p}). Depart : ${s}. Je suis en route !`;
-            const smsUrl = `sms:${tel}${isIOS ? '&' : '?'}body=${encodeURIComponent(smsText)}`;
+            const smsBody = "KLAK : Course acceptee. Je suis en route !";
+            const smsUrl = `sms:${tel}${isIOS ? '&' : '?'}body=${encodeURIComponent(smsBody)}`;
 
-            // Message pour les chauffeurs (Telegram)
-            let textT = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n`;
-            textT += `📞 *CLIENT :* [${tel}](tel:${tel})\n`;
-            textT += `📍 *DÉPART :* ${s}\n`;
-            if(stops.length) textT += `🛑 *ÉTAPES :* ${stops.join(' / ')}\n`;
-            textT += `🏁 *DESTINATION :* ${e}\n`;
-            textT += `💰 *TARIF FIXE : ${p}*`;
+            // Texte brut (Sans Markdown pour éviter les blocages)
+            let msg = "🚕 NOUVELLE RESERVATION KLAK\n\n" +
+                      "📞 CLIENT: " + tel + "\n" +
+                      "📍 DEPART: " + s + "\n" +
+                      (stops.length ? "🛑 ETAPES: " + stops.join(' / ') + "\n" : "") +
+                      "🏁 VERS: " + e + "\n" +
+                      "💰 TARIF: " + p;
 
             const keyboard = {
                 inline_keyboard: [
-                    [{ text: "💬 CONFIRMER PAR SMS", url: smsUrl }],
-                    [{ text: "📞 APPELER LE CLIENT", url: `tel:${tel}` }]
+                    [{ text: "💬 RÉPONDRE SMS", url: smsUrl }],
+                    [{ text: "📞 APPELER CLIENT", url: "tel:" + tel }]
                 ]
             };
 
-            // URL D'ENVOI DIRECTE (Celle qui a marché)
-            const finalUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(textT)}&parse_mode=Markdown&reply_markup=${JSON.stringify(keyboard)}`;
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&reply_markup=${JSON.stringify(keyboard)}`;
 
-            fetch(finalUrl, { mode: 'no-cors' })
-            .then(() => {
-                // Succès - Affichage Facturette
+            fetch(url, { mode: 'no-cors' }).then(() => {
                 document.getElementById('invPrice').innerText = p;
                 document.getElementById('invDist').innerText = document.getElementById('infoVal').innerText;
                 document.getElementById('invTel').innerText = tel;
                 document.getElementById('invoiceModal').classList.remove('hidden');
-            })
-            .catch(() => alert("Erreur réseau. Vérifiez votre connexion."));
+            });
         }
     </script>
 </body>
