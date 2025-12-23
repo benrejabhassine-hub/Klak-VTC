@@ -2,23 +2,33 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLAK - Réservations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>KLAK - Réservations VTC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @keyframes snapIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        body { background: #000; color: white; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* Animations fluides iOS/Android */
+        @keyframes snapIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
         #klak-loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.6s ease 2.2s forwards; }
-        .snap-emoji { font-size: 80px; animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .snap-emoji { font-size: 80px; animation: snapIn 0.5s ease-out; }
         .klak-text { color: #fbbf24; font-weight: 900; font-size: 2.5rem; font-style: italic; letter-spacing: -2px; margin-top: 10px; }
-        body { background: #000; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; }
-        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; }
-        .suggestion-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+        
+        .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; }
+        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 12px; display: none; max-height: 250px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .suggestion-item { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 14px; font-weight: 600; color: #333; }
+        
         .input-wrap { background: rgba(255,255,255,0.08); border-radius: 18px; display: flex; align-items: center; transition: 0.3s; border: 1px solid transparent; }
-        .input-wrap:focus-within { border-color: #fbbf24; }
-        input { background: transparent; width: 100%; outline: none; color: white; padding: 14px; font-size: 14px; }
+        .input-wrap:focus-within { border-color: #fbbf24; background: rgba(255,255,255,0.12); }
+        input { background: transparent; width: 100%; outline: none; color: white; padding: 16px; font-size: 16px; } /* 16px évite le zoom auto sur iPhone */
+        
+        .invoice-card { animation: snapIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen max-w-lg mx-auto">
@@ -28,87 +38,120 @@
         <div class="klak-text">KLAK</div>
     </div>
 
-    <header class="text-center py-8">
+    <div id="invoiceModal" class="fixed inset-0 z-[1000] bg-black/95 flex items-center justify-center p-4 hidden">
+        <div class="bg-white text-black w-full rounded-[35px] p-8 space-y-6 shadow-2xl invoice-card relative">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-check text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-black italic uppercase">Demande Confirmée</h2>
+                <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">Récapitulatif de votre trajet</p>
+            </div>
+            
+            <div class="space-y-4 border-y border-dashed border-gray-200 py-6">
+                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[11px] uppercase">Tarif Fixe</span><span class="font-black text-2xl text-black" id="invPrice">-- €</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[11px] uppercase">Estimation</span><span class="font-bold" id="invDist">-- km</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[11px] uppercase">Votre Mobile</span><span class="font-bold" id="invTel">--</span></div>
+            </div>
+
+            <div class="bg-yellow-50 p-4 rounded-2xl">
+                <p class="text-[11px] text-yellow-800 font-bold text-center leading-relaxed italic animate-pulse">
+                    <i class="fa-solid fa-bell mr-2"></i>Un chauffeur vous contacte par SMS/WhatsApp immédiatement pour confirmer son arrivée.
+                </p>
+            </div>
+
+            <button onclick="location.reload()" class="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest active:scale-95 transition">Fermer</button>
+        </div>
+    </div>
+
+    <header class="text-center py-6">
         <h1 class="text-7xl font-black italic tracking-tighter text-white">KLAK</h1>
-        <div class="h-1 w-20 bg-yellow-500 mx-auto mt-2 rounded-full"></div>
+        <div class="flex items-center justify-center gap-2 mt-2">
+            <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span class="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Service Chauffeur Privé</span>
+        </div>
     </header>
 
-    <main class="glass p-6 space-y-4 shadow-2xl">
+    <main class="glass p-6 space-y-5">
         <div class="relative">
-            <div class="flex justify-between items-end mb-1">
-                <label class="text-[10px] font-black text-gray-500 uppercase px-1">Départ</label>
-                <button onclick="getCurrentLocation()" class="text-[9px] font-bold text-yellow-500 uppercase flex items-center gap-1 mb-1">
+            <div class="flex justify-between items-end mb-2 px-1">
+                <label class="text-[10px] font-black text-gray-500 uppercase">Départ</label>
+                <button onclick="getCurrentLocation()" class="text-[10px] font-black text-yellow-500 uppercase flex items-center gap-1">
                     <i class="fa-solid fa-location-crosshairs"></i> Ma position
                 </button>
             </div>
             <div class="input-wrap">
                 <i class="fa-solid fa-circle text-[8px] text-yellow-500 mx-4"></i>
-                <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ">
+                <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ" autocomplete="off">
             </div>
             <div class="suggestion-box"></div>
         </div>
 
-        <div id="stopsContainer"></div>
-        
-        <button onclick="addStop()" class="text-[11px] font-black text-yellow-500 uppercase flex items-center gap-2 py-2">
-            <i class="fa-solid fa-circle-plus text-lg"></i> Ajouter une étape
+        <div id="stopsContainer" class="space-y-3"></div>
+        <button onclick="addStop()" class="text-[10px] font-black text-gray-400 uppercase flex items-center gap-2 px-1">
+            <i class="fa-solid fa-plus-circle text-lg text-yellow-500/50"></i> Ajouter une étape
         </button>
 
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-500 uppercase px-1">Destination</label>
+            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1">Destination</label>
             <div class="input-wrap">
-                <i class="fa-solid fa-location-dot text-gray-500 mx-4 text-sm"></i>
-                <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?">
+                <i class="fa-solid fa-location-dot text-gray-400 mx-4 text-sm"></i>
+                <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?" autocomplete="off">
             </div>
             <div class="suggestion-box"></div>
         </div>
 
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-500 uppercase px-1">Numéro de téléphone</label>
+            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1">Votre Numéro de téléphone</label>
             <div class="input-wrap">
-                <i class="fa-solid fa-phone text-gray-500 mx-4 text-sm"></i>
-                <input type="tel" id="phoneInput" placeholder="06 00 00 00 00">
+                <i class="fa-solid fa-phone text-gray-400 mx-4 text-sm"></i>
+                <input type="tel" id="phoneInput" placeholder="06 00 00 00 00" maxlength="14">
             </div>
         </div>
 
-        <button onclick="calculate()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition">
-            Calculer le prix
-        </button>
+        <button onclick="calculate()" class="w-full bg-yellow-500 text-black py-5 rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition">Calculer mon tarif</button>
 
-        <div id="result" class="hidden mt-4 bg-white text-black p-8 rounded-[35px] text-center shadow-2xl">
-            <div class="text-[10px] font-black opacity-30 uppercase mb-1">Tarif Fixe</div>
-            <div class="text-6xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
-            <div class="inline-block bg-gray-100 px-4 py-2 rounded-full text-[11px] font-bold" id="infoVal">--</div>
+        <div id="result" class="hidden mt-6 bg-white text-black p-8 rounded-[35px] text-center shadow-2xl animate-[snapIn_0.3s_ease-out]">
+            <div class="text-[10px] font-black opacity-30 uppercase tracking-[3px] mb-2">Prix Fixe Garanti</div>
+            <div class="text-7xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
+            <div class="inline-block bg-gray-100 px-5 py-2 rounded-full text-[11px] font-black" id="infoVal">-- KM</div>
             
-            <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 mt-6 active:scale-95 transition">
-                <i id="btnIcon" class="fa-solid fa-check-circle text-2xl text-yellow-500"></i> <span id="btnText">RÉSERVER MA COURSE</span>
+            <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 mt-8 active:scale-95 transition">
+                <i class="fa-solid fa-bolt text-yellow-500"></i> RÉSERVER LA COURSE
             </button>
         </div>
     </main>
 
+    <footer class="mt-auto py-8 text-center text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+        © 2025 KLAK - Transport de Prestige
+    </footer>
+
     <script>
-        let allCoords = { start: null, end: null, stops: {} };
+        let allCoords = { start: null, end: null };
         const botToken = "8548242544:AAEBmzM8-wj0AHtaWVpkgmKoLq_Y9btfbCQ";
         const chatId = "-1003529719062";
 
         async function getCurrentLocation() {
-            if (!navigator.geolocation) return alert("Géolocalisation non supportée");
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude, lon = pos.coords.longitude;
                 allCoords.start = [lon, lat];
                 const r = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`);
                 const d = await r.json();
-                if (d.features.length > 0) document.getElementById('startInput').value = d.features[0].properties.label;
-                else document.getElementById('startInput').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                document.getElementById('startInput').value = d.features[0]?.properties.label || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
             });
         }
 
         function addStop() {
-            const id = 'stop_' + Date.now();
             const div = document.createElement('div');
-            div.className = 'mt-2 relative';
-            div.innerHTML = `<div class="input-wrap"><i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-5"></i><input type="text" class="addr-input stop-input" id="${id}" placeholder="Étape"><button onclick="this.parentElement.parentElement.remove()" class="pr-4 text-red-500"><i class="fa-solid fa-trash"></i></button></div><div class="suggestion-box"></div>`;
+            div.className = 'relative animate-[snapIn_0.2s_ease-out]';
+            div.innerHTML = `
+                <div class="input-wrap">
+                    <i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-5"></i>
+                    <input type="text" class="addr-input stop-input" placeholder="Adresse de l'étape">
+                    <button onclick="this.parentElement.parentElement.remove()" class="pr-4 text-red-400"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="suggestion-box"></div>`;
             document.getElementById('stopsContainer').appendChild(div);
             initAutocomplete();
         }
@@ -117,8 +160,8 @@
             document.querySelectorAll('.addr-input').forEach(el => {
                 const box = el.parentElement.nextElementSibling;
                 el.oninput = async () => {
-                    if(el.value.length < 3) return;
-                    const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=4`);
+                    if(el.value.length < 3) { box.style.display = 'none'; return; }
+                    const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=5`);
                     const d = await r.json();
                     box.innerHTML = d.features.map(f => `<div class="suggestion-item">${f.properties.label}</div>`).join('');
                     box.style.display = 'block';
@@ -126,8 +169,7 @@
                         item.onclick = () => {
                             el.value = d.features[i].properties.label;
                             if(el.id === 'startInput') allCoords.start = d.features[i].geometry.coordinates;
-                            else if(el.id === 'endInput') allCoords.end = d.features[i].geometry.coordinates;
-                            else allCoords.stops[el.id] = d.features[i].geometry.coordinates;
+                            if(el.id === 'endInput') allCoords.end = d.features[i].geometry.coordinates;
                             box.style.display = 'none';
                         };
                     });
@@ -136,65 +178,60 @@
         }
         initAutocomplete();
 
-        function getDist(c1, c2) {
-            if(!c1 || !c2) return 0;
+        function calculate() {
+            if(!allCoords.start || !document.getElementById('endInput').value) return alert("Précisez le départ et l'arrivée");
+            const c1 = allCoords.start, c2 = allCoords.end || [2.35, 48.85];
             const R = 6371;
             const dLat = (c2[1]-c1[1]) * Math.PI/180;
             const dLon = (c2[0]-c1[0]) * Math.PI/180;
             const a = Math.sin(dLat/2)**2 + Math.cos(c1[1]*Math.PI/180) * Math.cos(c2[1]*Math.PI/180) * Math.sin(dLon/2)**2;
-            return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1.5;
-        }
-
-        function calculate() {
-            if(!allCoords.start || !allCoords.end) return alert("Veuillez choisir les adresses");
-            let totalDist = getDist(allCoords.start, allCoords.end);
-            let finalPrice = Math.max(10, 3 + (totalDist * 1.40));
-            document.getElementById('pVal').innerText = Math.ceil(finalPrice) + " €";
-            document.getElementById('infoVal').innerText = totalDist.toFixed(1) + " KM ENV.";
+            const dist = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1.35;
+            
+            const price = Math.max(15, 5 + (dist * 1.6));
+            document.getElementById('pVal').innerText = Math.ceil(price) + " €";
+            document.getElementById('infoVal').innerText = dist.toFixed(1) + " KM ENV.";
             document.getElementById('result').classList.remove('hidden');
         }
 
         function send() {
-            const btn = document.getElementById('sendBtn');
-            const btnText = document.getElementById('btnText');
-            
+            const tel = document.getElementById('phoneInput').value;
             const s = document.getElementById('startInput').value;
             const e = document.getElementById('endInput').value;
-            const tel = document.getElementById('phoneInput').value;
-            const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v);
             const p = document.getElementById('pVal').innerText;
-            const d = document.getElementById('infoVal').innerText;
+            const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v);
 
-            if(!tel) return alert("Veuillez saisir votre numéro de téléphone pour la facture.");
+            if(!tel || tel.length < 10) return alert("Numéro de téléphone requis");
 
-            const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(stops.join('|'))}&travelmode=driving`;
+            // Nettoyage pour WhatsApp et SMS
+            let cleanTel = tel.replace(/\s/g, '').replace(/^0/, '33');
             
-            let msg = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n`;
-            msg += `📞 *CLIENT :* [${tel}](tel:${tel})\n`;
-            msg += `📍 *DÉPART :* ${s}\n`;
-            if(stops.length > 0) msg += `🛑 *ÉTAPES :* ${stops.join(' / ')}\n`;
-            msg += `🏁 *DESTINATION :* ${e}\n`;
-            msg += `📏 *DISTANCE :* ${d}\n`;
-            msg += `💰 *TARIF FIXE : ${p}*\n\n`;
-            msg += `🌍 [LANCER LE GPS](${mapsUrl})`;
+            // Liens universels (iOS/Android)
+            const smsText = `Bonjour, c'est votre chauffeur KLAK. J'ai accepté votre course de ${s} vers ${e} (${p}). Je suis en route !`;
+            const smsUrl = `sms:${tel}${navigator.userAgent.match(/iPhone/i) ? '&' : '?'}body=${encodeURIComponent(smsText)}`;
+            const waUrl = `https://wa.me/${cleanTel}?text=${encodeURIComponent(smsText)}`;
+
+            let msg = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n` +
+                      `📞 *CLIENT :* [${tel}](tel:${tel})\n` +
+                      `📍 *DÉPART :* ${s}\n` +
+                      (stops.length ? `🛑 *ÉTAPES :* ${stops.join(' / ')}\n` : '') +
+                      `🏁 *DESTINATION :* ${e}\n` +
+                      `💰 *TARIF : ${p}*\n\n` +
+                      `🌍 [OUVRIR LE GPS](https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(stops.join('|'))})`;
 
             const keyboard = {
-                inline_keyboard: [[
-                    { text: "✅ ACCEPTER LA COURSE", callback_data: "accepter_course" }
-                ]]
+                inline_keyboard: [
+                    [{ text: "💬 RÉPONDRE PAR SMS", url: smsUrl }],
+                    [{ text: "🟢 RÉPONDRE PAR WHATSAPP", url: waUrl }],
+                    [{ text: "📞 APPELER LE CLIENT", url: `tel:${tel}` }]
+                ]
             };
 
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown&reply_markup=${JSON.stringify(keyboard)}`;
-
-            fetch(url).then(res => {
-                if(res.ok) {
-                    btn.classList.replace('bg-black', 'bg-green-600');
-                    btnText.innerText = "C'EST KLAKÉ ! ENVOYÉ";
-                    setTimeout(() => {
-                        btn.classList.replace('bg-green-600', 'bg-black');
-                        btnText.innerText = "RÉSERVER MA COURSE";
-                    }, 4000);
-                }
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown&reply_markup=${JSON.stringify(keyboard)}`)
+            .then(() => {
+                document.getElementById('invPrice').innerText = p;
+                document.getElementById('invDist').innerText = document.getElementById('infoVal').innerText;
+                document.getElementById('invTel').innerText = tel;
+                document.getElementById('invoiceModal').classList.remove('hidden');
             });
         }
     </script>
