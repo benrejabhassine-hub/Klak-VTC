@@ -35,7 +35,12 @@
 
     <main class="glass p-6 space-y-4 shadow-2xl">
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-500 uppercase px-1">Départ</label>
+            <div class="flex justify-between items-end mb-1">
+                <label class="text-[10px] font-black text-gray-500 uppercase px-1">Départ</label>
+                <button onclick="getCurrentLocation()" class="text-[9px] font-bold text-yellow-500 uppercase flex items-center gap-1 mb-1">
+                    <i class="fa-solid fa-location-crosshairs"></i> Ma position
+                </button>
+            </div>
             <div class="input-wrap">
                 <i class="fa-solid fa-circle text-[8px] text-yellow-500 mx-4"></i>
                 <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ">
@@ -58,6 +63,14 @@
             <div class="suggestion-box"></div>
         </div>
 
+        <div class="relative">
+            <label class="text-[10px] font-black text-gray-500 uppercase px-1">Numéro de téléphone</label>
+            <div class="input-wrap">
+                <i class="fa-solid fa-phone text-gray-500 mx-4 text-sm"></i>
+                <input type="tel" id="phoneInput" placeholder="06 00 00 00 00">
+            </div>
+        </div>
+
         <button onclick="calculate()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition">
             Calculer le prix
         </button>
@@ -67,31 +80,35 @@
             <div class="text-6xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
             <div class="inline-block bg-gray-100 px-4 py-2 rounded-full text-[11px] font-bold" id="infoVal">--</div>
             
-            <button onclick="send()" class="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 mt-6 active:scale-95 transition">
-                <i class="fa-brands fa-telegram text-2xl text-sky-400"></i> CONFIRMER SUR TELEGRAM
+            <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 mt-6 active:scale-95 transition">
+                <i id="btnIcon" class="fa-solid fa-check-circle text-2xl text-yellow-500"></i> <span id="btnText">RÉSERVER MA COURSE</span>
             </button>
         </div>
     </main>
 
     <script>
         let allCoords = { start: null, end: null, stops: {} };
-        
-        // --- CONFIGURATION TELEGRAM (Infos de tes photos) ---
         const botToken = "8548242544:AAEBmzM8-wj0AHtaWVpkgmKoLq_Y9btfbCQ";
         const chatId = "-1003529719062";
+
+        async function getCurrentLocation() {
+            if (!navigator.geolocation) return alert("Géolocalisation non supportée");
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                allCoords.start = [lon, lat];
+                const r = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`);
+                const d = await r.json();
+                if (d.features.length > 0) document.getElementById('startInput').value = d.features[0].properties.label;
+                else document.getElementById('startInput').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+            });
+        }
 
         function addStop() {
             const id = 'stop_' + Date.now();
             const div = document.createElement('div');
             div.className = 'mt-2 relative';
-            div.innerHTML = `
-                <div class="input-wrap">
-                    <i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-5"></i>
-                    <input type="text" class="addr-input stop-input" id="${id}" placeholder="Étape">
-                    <button onclick="this.parentElement.parentElement.remove()" class="pr-4 text-red-500"><i class="fa-solid fa-trash"></i></button>
-                </div>
-                <div class="suggestion-box"></div>
-            `;
+            div.innerHTML = `<div class="input-wrap"><i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-5"></i><input type="text" class="addr-input stop-input" id="${id}" placeholder="Étape"><button onclick="this.parentElement.parentElement.remove()" class="pr-4 text-red-500"><i class="fa-solid fa-trash"></i></button></div><div class="suggestion-box"></div>`;
             document.getElementById('stopsContainer').appendChild(div);
             initAutocomplete();
         }
@@ -138,33 +155,45 @@
         }
 
         function send() {
+            const btn = document.getElementById('sendBtn');
+            const btnText = document.getElementById('btnText');
+            
             const s = document.getElementById('startInput').value;
             const e = document.getElementById('endInput').value;
+            const tel = document.getElementById('phoneInput').value;
             const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v);
             const p = document.getElementById('pVal').innerText;
             const d = document.getElementById('infoVal').innerText;
 
-            // Création du lien GPS Google Maps
-            const mapsUrl = `http://maps.google.com/maps?saddr=${encodeURIComponent(s)}&daddr=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(stops.join('|'))}`;
+            if(!tel) return alert("Veuillez saisir votre numéro de téléphone pour la facture.");
+
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(stops.join('|'))}&travelmode=driving`;
             
-            // Formatage du message pour Telegram
             let msg = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n`;
+            msg += `📞 *CLIENT :* [${tel}](tel:${tel})\n`;
             msg += `📍 *DÉPART :* ${s}\n`;
             if(stops.length > 0) msg += `🛑 *ÉTAPES :* ${stops.join(' / ')}\n`;
             msg += `🏁 *DESTINATION :* ${e}\n`;
             msg += `📏 *DISTANCE :* ${d}\n`;
             msg += `💰 *TARIF FIXE : ${p}*\n\n`;
-            msg += `🌍 [LANCER LE GPS](${mapsUrl})\n\n`;
-            msg += `✅ *Répondez "OK" pour valider !*`;
+            msg += `🌍 [LANCER LE GPS](${mapsUrl})`;
 
-            // Envoi via l'API Telegram
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`;
+            const keyboard = {
+                inline_keyboard: [[
+                    { text: "✅ ACCEPTER LA COURSE", callback_data: "accepter_course" }
+                ]]
+            };
+
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown&reply_markup=${JSON.stringify(keyboard)}`;
 
             fetch(url).then(res => {
                 if(res.ok) {
-                    alert("C'est Klaké ! Demande envoyée au réseau.");
-                } else {
-                    alert("Erreur lors de l'envoi.");
+                    btn.classList.replace('bg-black', 'bg-green-600');
+                    btnText.innerText = "C'EST KLAKÉ ! ENVOYÉ";
+                    setTimeout(() => {
+                        btn.classList.replace('bg-green-600', 'bg-black');
+                        btnText.innerText = "RÉSERVER MA COURSE";
+                    }, 4000);
                 }
             });
         }
