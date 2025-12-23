@@ -1,214 +1,167 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLAK - Votre Chauffeur Privé</title>
+    <title>KLAK - Réseau Chauffeurs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --klak-gold: #fbbf24; }
-        body { background: #000; color: white; margin: 0; font-family: sans-serif; overflow-x: hidden; }
-
-        /* SPLASH SCREEN */
-        #splash {
-            position: fixed; inset: 0; background: radial-gradient(circle at center, #1a1a1a, #000);
-            z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .snap-icon { font-size: 80px; animation: snapAnim 1s ease-in-out infinite alternate; }
-        @keyframes snapAnim { from { transform: scale(1); } to { transform: scale(1.2) rotate(10deg); } }
-
-        /* APP INTERFACE */
-        .glass-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 32px; }
-        
-        .suggestion-box { 
-            position: absolute; z-index: 9999; width: 100%; background: #fff; color: #000; 
-            border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; 
-            margin-top: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        .suggestion-item { padding: 14px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; line-height: 1.2; }
-        .suggestion-item:hover { background: var(--klak-gold); }
-
-        .btn-main { background: var(--klak-gold); color: black; font-weight: 900; transition: transform 0.2s; }
-        .btn-main:active { transform: scale(0.98); }
-        
-        .loader { width: 20px; height: 20px; border: 3px solid #000; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { background: #000; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; }
+        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; margin-top: 4px; }
+        .suggestion-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        input { background: transparent; width: 100%; outline: none; color: white; padding: 12px; }
+        .input-wrap { background: rgba(255,255,255,0.08); border-radius: 16px; display: flex; align-items: center; padding-right: 12px; border: 1px solid transparent; }
+        .input-wrap:focus-within { border-color: #fbbf24; }
     </style>
 </head>
-<body>
+<body class="p-4 flex flex-col min-h-screen max-w-lg mx-auto">
 
-    <div id="splash">
-        <div class="snap-icon">👌</div>
-        <h1 class="text-6xl font-black italic mt-4">KLAK</h1>
-        <p class="text-gray-400 mt-2 tracking-widest uppercase text-[10px]">Votre chauffeur est là</p>
-    </div>
+    <header class="text-center py-8">
+        <h1 class="text-6xl font-black italic tracking-tighter">KLAK</h1>
+        <p class="text-yellow-500 text-[9px] font-black uppercase tracking-[0.4em] mt-2">Expert VTC • 3 Chauffeurs</p>
+    </header>
 
-    <div id="app" class="hidden min-h-screen p-4 flex flex-col items-center pb-12">
-        <header class="text-center my-8">
-            <h1 class="text-5xl font-black italic tracking-tighter">KLAK</h1>
-            <p class="text-[9px] text-yellow-500 uppercase tracking-widest font-bold">Premium VTC Service</p>
-        </header>
-
-        <main class="glass-card w-full max-w-lg p-6 space-y-8">
-            
-            <div class="space-y-6 relative">
-                <div class="relative">
-                    <label class="text-yellow-500 text-[10px] uppercase font-black ml-1 mb-2 block">Point de départ</label>
-                    <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/10">
-                        <i class="fa-solid fa-circle text-[10px] text-yellow-500 mr-4"></i>
-                        <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Saisir l'adresse..." data-type="start">
-                    </div>
-                    <div class="suggestion-box"></div>
-                </div>
-
-                <div id="steps-container" class="space-y-6"></div>
-
-                <button onclick="addStep()" class="text-yellow-500 text-[11px] font-black flex items-center gap-2">
-                    <i class="fa-solid fa-plus-circle text-lg"></i> AJOUTER UN ARRÊT
-                </button>
-
-                <div class="relative">
-                    <label class="text-yellow-500 text-[10px] uppercase font-black ml-1 mb-2 block">Destination</label>
-                    <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/10">
-                        <i class="fa-solid fa-location-arrow text-gray-400 mr-4"></i>
-                        <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Où allez-vous ?" data-type="end">
-                    </div>
-                    <div class="suggestion-box"></div>
-                </div>
+    <main class="glass p-6 space-y-4">
+        <div class="relative">
+            <div class="flex justify-between items-center mb-1 px-1">
+                <label class="text-[10px] font-black text-gray-500 uppercase">Prise en charge</label>
+                <button onclick="getLocation()" class="text-[10px] text-yellow-500 font-bold"><i class="fa-solid fa-location-crosshairs"></i> MA POSITION</button>
             </div>
-
-            <div class="relative">
-                <label class="text-yellow-500 text-[10px] uppercase font-black ml-1 mb-2 block">Horaire</label>
-                <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/10">
-                    <i class="fa-solid fa-clock text-gray-500 mr-4"></i>
-                    <input type="datetime-local" id="timeInput" class="bg-transparent w-full outline-none text-sm text-white">
-                </div>
+            <div class="input-wrap">
+                <i class="fa-solid fa-circle text-[8px] text-yellow-500 mx-3"></i>
+                <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ">
             </div>
+            <div class="suggestion-box"></div>
+        </div>
 
-            <button onclick="processCalculation()" id="calcBtn" class="btn-main w-full py-5 rounded-2xl uppercase font-black">
-                Calculer le prix
+        <div class="flex justify-center -my-3 relative z-10">
+            <button onclick="reverseAddresses()" class="bg-yellow-500 text-black h-9 w-9 rounded-full shadow-xl flex items-center justify-center border-4 border-black active:scale-90 transition">
+                <i class="fa-solid fa-arrows-up-down text-sm"></i>
             </button>
+        </div>
 
-            <div id="priceDisplay" class="hidden bg-yellow-500 text-black p-8 rounded-[32px] text-center shadow-2xl">
-                <p class="text-[10px] uppercase font-black opacity-60">Estimation du trajet</p>
-                <div class="text-6xl font-black my-1" id="priceVal">0 €</div>
-                <p class="text-[11px] font-bold" id="distDetail">-- km</p>
+        <div class="relative">
+            <label class="text-[10px] font-black text-gray-500 uppercase mb-1 block px-1">Destination</label>
+            <div class="input-wrap">
+                <i class="fa-solid fa-location-dot text-xs text-gray-500 mx-3"></i>
+                <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?">
             </div>
+            <div class="suggestion-box"></div>
+        </div>
 
-            <div id="orderZone" class="hidden">
-                <button onclick="sendToNetwork()" class="w-full bg-white text-black py-6 rounded-3xl font-black text-lg shadow-xl flex items-center justify-center gap-3">
-                    <i class="fa-brands fa-whatsapp text-2xl text-green-500"></i> RÉSERVER MAINTENANT
-                </button>
-                <p class="text-center text-[10px] text-gray-500 mt-4 uppercase font-bold tracking-widest">Demande envoyée au réseau KLAK</p>
+        <div>
+            <label class="text-[10px] font-black text-gray-500 uppercase mb-1 block px-1">Date & Heure</label>
+            <div class="input-wrap">
+                <i class="fa-solid fa-calendar-day text-xs text-gray-500 mx-3"></i>
+                <input type="datetime-local" id="timeInput">
             </div>
-        </main>
-    </div>
+        </div>
+
+        <button onclick="calculate()" id="btnCalc" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm mt-2 shadow-lg shadow-yellow-500/10 active:scale-95 transition">
+            Estimer mon trajet
+        </button>
+
+        <div id="result" class="hidden animate-in fade-in zoom-in duration-300">
+            <div class="bg-white text-black p-6 rounded-[32px] text-center space-y-4 shadow-2xl">
+                <div>
+                    <div class="text-[10px] font-black opacity-30 uppercase tracking-[0.2em]">Tarif Garanti</div>
+                    <div class="text-6xl font-black tracking-tighter" id="pVal">-- €</div>
+                    <div class="flex justify-center gap-3 text-[11px] font-bold opacity-60 mt-1 uppercase">
+                        <span id="dVal">--</span> <span class="text-yellow-500">|</span> <span id="tVal">--</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2">
+                    <button onclick="send('wa')" class="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 active:scale-95 transition">
+                        <i class="fa-brands fa-whatsapp text-2xl text-green-500"></i> RÉSERVER
+                    </button>
+                    <button onclick="send('sms')" class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i class="fa-solid fa-comment-sms"></i> SMS DE SECOURS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-8 text-center">
+        <div class="text-[10px] text-white/20 font-bold uppercase tracking-[0.4em]">Service Privé KLAK</div>
+    </footer>
 
     <script>
-        // Splash screen 2.5s
-        setTimeout(() => {
-            document.getElementById('splash').style.display = 'none';
-            document.getElementById('app').classList.remove('hidden');
-        }, 2500);
+        let coords = { start: null, end: null };
+        const myNum = '33650011771'; // Numéro principal du réseau
 
-        let routeCoords = { start: null, end: null, steps: [] };
-        const nums = ['33650011771', '33784711014']; // Tes numéros
+        function reverseAddresses() {
+            const sIn = document.getElementById('startInput');
+            const eIn = document.getElementById('endInput');
+            [sIn.value, eIn.value] = [eIn.value, sIn.value];
+            [coords.start, coords.end] = [coords.end, coords.start];
+        }
 
-        function initInput(el) {
-            const suggest = el.parentElement.nextElementSibling;
-            el.addEventListener('input', async () => {
-                if (el.value.length < 3) { suggest.style.display = 'none'; return; }
-                try {
-                    const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=5`);
-                    const data = await res.json();
-                    suggest.innerHTML = '';
-                    data.features.forEach(f => {
-                        const div = document.createElement('div');
-                        div.className = 'suggestion-item';
-                        div.innerText = f.properties.label;
-                        div.onclick = () => {
-                            el.value = f.properties.label;
-                            const type = el.getAttribute('data-type');
-                            if(type === 'start') routeCoords.start = f.geometry.coordinates;
-                            else if(type === 'end') routeCoords.end = f.geometry.coordinates;
-                            else {
-                                const idx = el.getAttribute('data-index');
-                                routeCoords.steps[idx] = f.geometry.coordinates;
-                            }
-                            suggest.style.display = 'none';
-                        };
-                        suggest.appendChild(div);
-                    });
-                    suggest.style.display = 'block';
-                } catch (e) { console.log(e); }
+        async function getLocation() {
+            navigator.geolocation.getCurrentPosition(async (p) => {
+                const res = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${p.coords.longitude}&lat=${p.coords.latitude}`);
+                const data = await res.json();
+                if(data.features[0]) {
+                    document.getElementById('startInput').value = data.features[0].properties.label;
+                    coords.start = [p.coords.longitude, p.coords.latitude];
+                }
             });
         }
 
-        document.querySelectorAll('.addr-input').forEach(initInput);
+        document.querySelectorAll('.addr-input').forEach(el => {
+            const box = el.parentElement.nextElementSibling;
+            el.addEventListener('input', async () => {
+                if(el.value.length < 3) return;
+                const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=4`);
+                const d = await r.json();
+                box.innerHTML = d.features.map(f => `<div class="suggestion-item">${f.properties.label}</div>`).join('');
+                box.style.display = 'block';
+                box.querySelectorAll('.suggestion-item').forEach((item, i) => {
+                    item.onclick = () => {
+                        el.value = d.features[i].properties.label;
+                        if(el.id === 'startInput') coords.start = d.features[i].geometry.coordinates;
+                        else coords.end = d.features[i].geometry.coordinates;
+                        box.style.display = 'none';
+                    };
+                });
+            });
+        });
 
-        function addStep() {
-            const container = document.getElementById('steps-container');
-            const index = routeCoords.steps.length;
-            routeCoords.steps.push(null);
-            const div = document.createElement('div');
-            div.className = 'relative animate__animated animate__fadeInIn';
-            div.innerHTML = `
-                <label class="text-yellow-500/70 text-[10px] uppercase font-black ml-1 mb-2 block">Arrêt</label>
-                <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/10">
-                    <i class="fa-solid fa-circle-dot text-gray-500 mr-4 text-[10px]"></i>
-                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Adresse arrêt..." data-type="step" data-index="${index}">
-                    <button onclick="this.parentElement.parentElement.remove();" class="text-red-500 ml-2"><i class="fa-solid fa-trash"></i></button>
-                </div>
-                <div class="suggestion-box"></div>`;
-            container.appendChild(div);
-            initInput(div.querySelector('.addr-input'));
-        }
-
-        function processCalculation() {
-            const btn = document.getElementById('calcBtn');
-            btn.innerHTML = '<span class="loader"></span>';
-            setTimeout(() => {
-                calculateFullRide();
-                btn.innerHTML = 'Recalculer';
-            }, 800);
-        }
-
-        function calculateDistance(c1, c2) {
-            return Math.sqrt(Math.pow(c2[1]-c1[1], 2) + Math.pow(c2[0]-c1[0], 2)) * 111 * 1.35;
-        }
-
-        function calculateFullRide() {
-            if(!routeCoords.start || !routeCoords.end) { alert("Veuillez sélectionner des adresses dans la liste."); return; }
-            let totalDist = 0;
-            let currentPos = routeCoords.start;
-            routeCoords.steps.forEach(s => { if(s) { totalDist += calculateDistance(currentPos, s); currentPos = s; } });
-            totalDist += calculateDistance(currentPos, routeCoords.end);
-            let prix = totalDist < 5 ? 10 : 3 + (totalDist * 1.3);
-            document.getElementById('distDetail').innerText = totalDist.toFixed(1) + " KM";
-            document.getElementById('priceVal').innerText = Math.ceil(prix) + " €";
-            document.getElementById('priceDisplay').classList.remove('hidden');
-            document.getElementById('orderZone').classList.remove('hidden');
-        }
-
-        function sendToNetwork() {
-            const inputs = document.querySelectorAll('.addr-input');
-            let trajet = `📍 DEPART : ${inputs[0].value}\n`;
-            const steps = document.querySelectorAll('[data-type="step"]');
-            steps.forEach(s => { if(s.value) trajet += `🛑 ARRET : ${s.value}\n`; });
-            trajet += `🏁 ARRIVEE : ${inputs[inputs.length-1].value}`;
+        function calculate() {
+            if(!coords.start || !coords.end) return alert("Veuillez sélectionner les adresses dans la liste");
+            const d = Math.sqrt(Math.pow(coords.end[1]-coords.start[1], 2) + Math.pow(coords.end[0]-coords.start[0], 2)) * 111 * 1.35;
+            const t = Math.round(d * 1.6 + 6);
+            const p = d < 5 ? 10 : 3 + (d * 1.5);
             
-            const prix = document.getElementById('priceVal').innerText;
-            const time = document.getElementById('timeInput').value.replace('T', ' à ');
+            document.getElementById('pVal').innerText = Math.ceil(p) + " €";
+            document.getElementById('dVal').innerText = d.toFixed(1) + " KM";
+            document.getElementById('tVal').innerText = t + " MIN";
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('btnCalc').innerText = "Recalculer";
+        }
+
+        function send(type) {
+            const s = document.getElementById('startInput').value;
+            const e = document.getElementById('endInput').value;
+            const h = document.getElementById('timeInput').value.replace('T', ' à ');
+            const p = document.getElementById('pVal').innerText;
             
-            const message = `🚕 *NOUVELLE DEMANDE KLAK*\n\n📅 *QUAND :* ${time}\n\n${trajet}\n\n💰 *PRIX ESTIMÉ : ${prix}*\n\n_Demande envoyée au réseau de chauffeurs._`;
-            
-            // On envoie au premier numéro de la liste
-            window.open(`https://wa.me/${nums[0]}?text=${encodeURIComponent(message)}`, '_blank');
+            // Les liens de réponses rapides qui te permettent de répondre au client en 1 clic
+            const r5 = `https://wa.me/?text=${encodeURIComponent("Bonjour, c'est KLAK. Je suis en route, j'arrive dans 5 min ! 🚕")}`;
+            const r10 = `https://wa.me/?text=${encodeURIComponent("Bonjour, c'est KLAK. Je suis en route, j'arrive dans 10 min ! 🚕")}`;
+            const r15 = `https://wa.me/?text=${encodeURIComponent("Bonjour, c'est KLAK. Je suis en route, j'arrive dans 15 min ! 🚕")}`;
+
+            const msg = `🚕 *RESA KLAK*\n\n📅 *DATE :* ${h}\n📍 *DE :* ${s}\n🏁 *VERS :* ${e}\n💰 *PRIX : ${p}*\n\n🛰️ *GPS WAZE :* https://waze.com/ul?q=${encodeURIComponent(s)}\n🛰️ *GPS MAPS :* https://www.google.com/maps/search/${encodeURIComponent(s)}\n\n--- ⚡ RÉPONDRE AU CLIENT ---\n✅ 5 MIN : ${r5}\n✅ 10 MIN : ${r10}\n✅ 15 MIN : ${r15}`;
+
+            if(type === 'wa') window.open(`https://wa.me/${myNum}?text=${encodeURIComponent(msg)}`, '_blank');
+            else window.open(`sms:${myNum}?body=${encodeURIComponent(msg)}`, '_blank');
         }
 
         document.getElementById('timeInput').value = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     </script>
 </body>
 </html>
+
