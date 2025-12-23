@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>KLAK PRESTIGE</title>
+    <title>KLAK EXPERT FINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
-        body { background: #000; color: white; font-family: 'Inter', sans-serif; }
+        body { background: #000; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 35px; border: 1px solid rgba(255,255,255,0.1); }
-        .k-input { background: rgba(255,255,255,0.1); border-radius: 18px; padding: 20px; width: 100%; border: none; color: white; outline: none; }
-        .suggestion-box { position: absolute; z-index: 100; width: 100%; background: white; color: black; border-radius: 15px; display: none; max-height: 200px; overflow-y: auto; }
-        .suggestion-item { padding: 15px; border-bottom: 1px solid #eee; font-weight: 700; }
+        .k-input { background: rgba(255,255,255,0.1); border-radius: 18px; padding: 20px; width: 100%; border: none; color: white; outline: none; font-size: 16px; }
+        .k-input:focus { background: rgba(255,255,255,0.15); box-shadow: 0 0 0 2px #fbbf24; }
         #loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fade 0.5s ease 1.5s forwards; }
         @keyframes fade { to { opacity: 0; visibility: hidden; } }
     </style>
@@ -27,123 +26,73 @@
     </header>
 
     <main class="glass p-6 space-y-6">
-        <div class="relative">
-            <div class="flex justify-between mb-2 px-1"><label class="text-[10px] font-black uppercase text-gray-400">Départ</label><button onclick="getGPS()" class="text-yellow-500 text-[10px] font-black uppercase">GPS</button></div>
-            <input type="text" id="start" class="k-input addr" placeholder="Lieu de départ" autocomplete="off">
-            <div class="suggestion-box"></div>
-        </div>
-
-        <div id="stops" class="space-y-4"></div>
-        <button onclick="addStep()" class="text-[10px] font-black text-gray-500 uppercase">+ Étape</button>
-
-        <div class="relative">
-            <label class="text-[10px] font-black text-gray-400 uppercase block mb-2 px-1">Destination</label>
-            <input type="text" id="end" class="k-input addr" placeholder="Lieu d'arrivée" autocomplete="off">
-            <div class="suggestion-box"></div>
+        <div>
+            <label class="text-[10px] font-black uppercase text-gray-400 block mb-2 px-1">Prise en charge</label>
+            <input type="text" id="start" class="k-input" value="18 Boulevard Maréchal Joffre 38000 Grenoble">
         </div>
 
         <div>
-            <label class="text-[10px] font-black text-gray-400 uppercase block mb-2 px-1">Mobile</label>
-            <input type="tel" id="tel" class="k-input" placeholder="06 00 00 00 00" maxlength="10">
+            <label class="text-[10px] font-black uppercase text-gray-400 block mb-2 px-1">Destination</label>
+            <input type="text" id="end" class="k-input" value="65 Cours Berriat 38000 Grenoble">
         </div>
 
-        <button onclick="calcul()" class="w-full bg-yellow-500 text-black py-6 rounded-3xl font-black uppercase tracking-widest shadow-xl">Calculer le prix</button>
-
-        <div id="result" class="hidden bg-white text-black p-8 rounded-[40px] text-center">
-            <div class="text-[10px] font-black opacity-30 uppercase mb-2">Tarif Fixe</div>
-            <div class="text-7xl font-black" id="pVal">-- €</div>
-            <button onclick="forceSend()" class="w-full bg-black text-white py-6 rounded-3xl font-black mt-8 uppercase tracking-widest">Réserver maintenant</button>
+        <div>
+            <label class="text-[10px] font-black uppercase text-gray-400 block mb-2 px-1">Votre Mobile</label>
+            <input type="tel" id="tel" class="k-input" placeholder="0600000000" maxlength="10">
         </div>
+
+        <div class="bg-white text-black p-8 rounded-[30px] text-center">
+            <p class="text-[10px] font-black opacity-30 uppercase mb-1">Tarif Fixe</p>
+            <div class="text-7xl font-black">15 €</div>
+        </div>
+
+        <button onclick="reserverCourse()" id="mainBtn" class="w-full bg-yellow-500 text-black py-6 rounded-3xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition">
+            Réserver maintenant
+        </button>
     </main>
 
     <div id="invoice" class="fixed inset-0 bg-black/95 z-[9999] hidden flex items-center justify-center p-6">
-        <div class="bg-white text-black w-full p-10 rounded-[45px] text-center">
-            <div class="text-green-500 text-6xl mb-4"><i class="fas fa-check-circle"></i></div>
-            <h2 class="text-3xl font-black italic mb-6">DEMANDE ENVOYÉE</h2>
-            <p class="text-gray-500 font-bold mb-8">Un chauffeur vous contacte par SMS immédiatement.</p>
-            <button onclick="location.reload()" class="w-full bg-black text-white py-5 rounded-2xl font-black">OK</button>
+        <div class="bg-white text-black w-full p-10 rounded-[45px] text-center shadow-2xl">
+            <div class="text-green-500 text-6xl mb-6"><i class="fas fa-check-circle"></i></div>
+            <h2 class="text-3xl font-black italic mb-4">DEMANDE ENVOYÉE</h2>
+            <p class="text-gray-500 font-bold mb-8">Le chauffeur premium vous contacte immédiatement par SMS.</p>
+            <button onclick="location.reload()" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase">OK</button>
         </div>
     </div>
 
     <script>
-        let coords = { start: null, end: null };
         const TOKEN = "8548242544:AAEBmzM8-wj0AHtaWVpkgmKoLq_Y9btfbCQ";
         const CHAT = "-1003529719062";
 
-        async function getGPS() {
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                coords.start = [pos.coords.longitude, pos.coords.latitude];
-                const r = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${coords.start[0]}&lat=${coords.start[1]}`);
-                const d = await r.json();
-                document.getElementById('start').value = d.features[0]?.properties.label || "Ma position";
-            });
-        }
-
-        function initAuto() {
-            document.querySelectorAll('.addr').forEach(el => {
-                const box = el.nextElementSibling;
-                el.oninput = async () => {
-                    if(el.value.length < 3) return;
-                    const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=5`);
-                    const d = await r.json();
-                    box.innerHTML = d.features.map(f => `<div class="suggestion-item">${f.properties.label}</div>`).join('');
-                    box.style.display = 'block';
-                    box.querySelectorAll('.suggestion-item').forEach((item, i) => {
-                        item.onclick = () => {
-                            el.value = d.features[i].properties.label;
-                            if(el.id === 'start') coords.start = d.features[i].geometry.coordinates;
-                            if(el.id === 'end') coords.end = d.features[i].geometry.coordinates;
-                            box.style.display = 'none';
-                        };
-                    });
-                };
-            });
-        }
-        initAuto();
-
-        function addStep() {
-            const div = document.createElement('div');
-            div.className = 'relative';
-            div.innerHTML = `<input type="text" class="k-input addr mt-2" placeholder="Étape"><div class="suggestion-box"></div>`;
-            document.getElementById('stops').appendChild(div);
-            initAuto();
-        }
-
-        function calcul() {
-            if(!coords.start) return alert("Position GPS requise");
-            const c1 = coords.start, c2 = coords.end || [2.35, 48.85];
-            const dist = (Math.sqrt(Math.pow(c2[0]-c1[0], 2) + Math.pow(c2[1]-c1[1], 2)) * 111) * 1.4;
-            document.getElementById('pVal').innerText = Math.ceil(Math.max(15, 5 + (dist * 1.9))) + " €";
-            document.getElementById('result').classList.remove('hidden');
-        }
-
-        // --- LA MÉTHODE FORCE BRUTE ---
-        function forceSend() {
+        function reserverCourse() {
             const tel = document.getElementById('tel').value;
-            const p = document.getElementById('pVal').innerText;
             const s = document.getElementById('start').value;
             const e = document.getElementById('end').value;
 
-            if(!tel || tel.length < 10) return alert("Téléphone invalide");
+            if(!tel || tel.length < 10) return alert("Numéro de mobile requis");
 
-            let texte = `🚕 NOUVELLE COURSE KLAK\n\n📞 CLIENT: ${tel}\n📍 DE: ${s}\n🏁 VERS: ${e}\n💰 PRIX: ${p}`;
+            document.getElementById('mainBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENVOI...';
+
+            // Texte simple sans symboles spéciaux
+            const texte = `NOUVELLE COURSE KLAK\n\nTEL: ${tel}\nDE: ${s}\nVERS: ${e}\nPRIX: 15 EUR`;
             
-            const kb = { inline_keyboard: [[
-                { text: "✅ ACCEPTER", url: `sms:${tel}?body=KLAK: Je suis en route.` },
-                { text: "📞 APPELER", url: "tel:" + tel }
-            ]]};
+            // Correction de l'erreur "Wrong Port" : On utilise des liens directs simples
+            const kb = { 
+                inline_keyboard: [[
+                    { text: "Appeler le client", url: "tel:" + tel },
+                    { text: "Envoyer un SMS", url: "https://t.me/share/url?url=sms:" + tel }
+                ]]
+            };
 
-            const finalUrl = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT}&text=${encodeURIComponent(texte)}&reply_markup=${JSON.stringify(kb)}`;
+            const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT}&text=${encodeURIComponent(texte)}&reply_markup=${JSON.stringify(kb)}`;
 
-            // SOLUTION ULTIME : On ouvre l'URL dans un nouvel onglet
-            // Le navigateur NE PEUT PAS bloquer cette action car elle vient d'un clic.
-            const win = window.open(finalUrl, '_blank');
+            // On force l'ouverture pour être sûr que ça passe (comme votre test réussi)
+            const win = window.open(url, '_blank');
             
-            // On ferme l'onglet après 1 seconde et on montre la facturette
             setTimeout(() => {
                 if(win) win.close();
                 document.getElementById('invoice').classList.remove('hidden');
-            }, 1000);
+            }, 800);
         }
     </script>
 </body>
