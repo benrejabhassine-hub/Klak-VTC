@@ -7,53 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* 1. ANIMATION CLAQUEMENT DE DOIGTS (INTRO) */
-        @keyframes snapIn {
-            0% { transform: scale(0); opacity: 0; }
-            70% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes fadeOut {
-            to { opacity: 0; visibility: hidden; }
-        }
+        /* ANIMATIONS */
+        @keyframes snapIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
         
         #klak-loader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            position: fixed; inset: 0; background: #000; z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             animation: fadeOut 0.6s ease 2.2s forwards;
         }
+        .snap-emoji { font-size: 80px; animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .klak-text { color: #fbbf24; font-weight: 900; font-size: 2.5rem; font-style: italic; letter-spacing: -2px; margin-top: 10px; }
+        .sub-text { color: white; font-size: 10px; text-transform: uppercase; letter-spacing: 4px; margin-top: 20px; font-weight: bold; opacity: 0.8; }
 
-        .snap-emoji {
-            font-size: 80px;
-            animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        .klak-text {
-            color: #fbbf24;
-            font-weight: 900;
-            font-size: 2.5rem;
-            font-style: italic;
-            letter-spacing: -2px;
-            margin-top: 10px;
-        }
-
-        .sub-text {
-            color: white;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-top: 20px;
-            font-weight: bold;
-            opacity: 0.8;
-        }
-
-        /* 2. STYLE GÉNÉRAL DU SITE */
+        /* STYLE GLOBAL */
         body { background: #000; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; }
         .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; }
@@ -125,7 +92,7 @@
 
     <script>
         let allCoords = { start: null, end: null, stops: {} };
-        // Ton lien de groupe WhatsApp
+        // LIEN DE TON GROUPE WHATSAPP
         const lienGroupe = "https://chat.whatsapp.com/J3zlqfRSAbZ22DTB9re2OQ";
 
         function addStop() {
@@ -215,13 +182,16 @@
             const d = document.getElementById('infoVal').innerText;
             
             const waypoints = stopNames.join('|');
+            // LIENS GPS OPTIMISÉS
             const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(waypoints)}&travelmode=driving`;
+            const wazeUrl = `https://waze.com/ul?q=${encodeURIComponent(e)}&navigate=yes`;
 
             let msg = `🚕 *NOUVELLE RÉSA KLAK*\n\n📍 *DÉPART :* ${s}\n`;
             if(stopNames.length > 0) msg += `🛑 *ARRÊTS :* ${stopNames.join(' -> ')}\n`;
-            msg += `🏁 *DESTINATION :* ${e}\n📏 *INFOS :* ${d}\n💰 *PRIX FIXE : ${p}*\n\n🛰️ *GPS :* ${mapsUrl}`;
+            msg += `🏁 *DESTINATION :* ${e}\n📏 *INFOS :* ${d}\n💰 *TARIF : ${p}*\n\n🌍 *MAPS :* ${mapsUrl}\n🚙 *WAZE :* ${wazeUrl}`;
 
-            window.open(`${lienGroupe}?text=${encodeURIComponent(msg)}`, '_blank');
+            // OUVERTURE DIRECTE DU GROUPE WHATSAPP AVEC LE TEXTE
+            window.open(`${lienGroupe}&text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         async function getLocation() {
@@ -238,4 +208,3 @@
 </body>
 </html>
 
-    
