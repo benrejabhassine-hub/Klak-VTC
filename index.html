@@ -7,123 +7,107 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes klakIntro {
+            0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
+            50% { transform: scale(1.1); filter: blur(0px); }
+            100% { transform: scale(1); opacity: 1; }
+        }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
         
-        body { background: #000; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; animation: fadeIn 0.6s ease-out; }
-        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .suggestion-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
-        .suggestion-item:hover { background: #f3f4f6; }
-        
+        body { background: #000; color: white; font-family: 'Inter', sans-serif; }
+        .logo-anim { animation: klakIntro 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; }
+        .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; }
+        .suggestion-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
         .input-wrap { background: rgba(255,255,255,0.08); border-radius: 18px; display: flex; align-items: center; transition: all 0.3s; border: 1px solid transparent; }
-        .input-wrap:focus-within { background: rgba(255,255,255,0.12); border-color: #fbbf24; transform: scale(1.02); }
-        
-        input { background: transparent; width: 100%; outline: none; color: white; padding: 14px; font-size: 15px; }
-        .btn-animate { transition: all 0.2s; }
-        .btn-animate:active { transform: scale(0.95); opacity: 0.8; }
-        
-        .stop-item { animation: slideIn 0.3s ease-out; }
+        .input-wrap:focus-within { border-color: #fbbf24; }
+        input { background: transparent; width: 100%; outline: none; color: white; padding: 14px; font-size: 14px; }
+        .btn-click:active { transform: scale(0.96); }
+        .stop-item { animation: slideIn 0.3s ease-out; margin-top: 10px; }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen max-w-lg mx-auto">
 
-    <header class="text-center py-10 animate-pulse">
+    <header class="text-center py-8 logo-anim">
         <h1 class="text-7xl font-black italic tracking-tighter text-white">KLAK</h1>
         <div class="h-1 w-20 bg-yellow-500 mx-auto mt-2 rounded-full"></div>
     </header>
 
-    <main class="glass p-6 space-y-5 shadow-2xl">
+    <main class="glass p-6 space-y-4 shadow-2xl">
         <div class="relative">
-            <div class="flex justify-between items-center mb-2 px-1">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Point de Départ</label>
-                <button onclick="getLocation()" class="text-[10px] text-yellow-500 font-bold hover:text-yellow-400 transition">
-                    <i class="fa-solid fa-location-arrow mr-1"></i> MA POSITION
-                </button>
+            <div class="flex justify-between items-center mb-1 px-1">
+                <label class="text-[10px] font-black text-gray-500 uppercase">Point de Départ</label>
+                <button onclick="getLocation()" class="text-[10px] text-yellow-500 font-bold underline">MA POSITION</button>
             </div>
             <div class="input-wrap">
                 <i class="fa-solid fa-circle text-[8px] text-yellow-500 mx-4"></i>
-                <input type="text" id="startInput" class="addr-input" placeholder="Saisissez le départ">
+                <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ" data-type="start">
             </div>
             <div class="suggestion-box"></div>
         </div>
 
-        <div id="stopsContainer" class="space-y-4"></div>
+        <div id="stopsContainer"></div>
         
-        <button onclick="addStop()" class="btn-animate text-[11px] font-black text-yellow-500 uppercase flex items-center gap-2 px-1">
+        <button onclick="addStop()" class="btn-click text-[11px] font-black text-yellow-500 uppercase flex items-center gap-2 py-2">
             <i class="fa-solid fa-circle-plus text-lg"></i> Ajouter une étape
         </button>
 
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block px-1 tracking-widest">Destination Finale</label>
+            <label class="text-[10px] font-black text-gray-500 uppercase mb-1 block px-1">Destination Finale</label>
             <div class="input-wrap">
                 <i class="fa-solid fa-location-dot text-gray-500 mx-4 text-sm"></i>
-                <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?">
+                <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?" data-type="end">
             </div>
             <div class="suggestion-box"></div>
         </div>
 
-        <button onclick="calculate()" class="btn-animate w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm shadow-lg shadow-yellow-500/20">
+        <button onclick="calculate()" class="btn-click w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm shadow-xl mt-2">
             Calculer le prix fixe
         </button>
 
-        <div id="result" class="hidden space-y-4">
-            <div class="bg-white text-black p-8 rounded-[35px] text-center shadow-2xl transform transition-all scale-100">
-                <div class="text-[10px] font-black opacity-30 uppercase tracking-[0.3em] mb-1">Tarif Estimé</div>
-                <div class="text-6xl font-black tracking-tighter mb-2" id="pVal">00 €</div>
-                <div class="inline-flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-full text-[11px] font-bold" id="infoVal">
-                    -- KM | -- MIN
-                </div>
+        <div id="result" class="hidden">
+            <div class="bg-white text-black p-8 rounded-[35px] text-center shadow-2xl mt-4 animate-in fade-in zoom-in duration-500">
+                <div class="text-[10px] font-black opacity-30 uppercase mb-1">Tarif Fixe</div>
+                <div class="text-6xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
+                <div class="inline-block bg-gray-100 px-4 py-2 rounded-full text-[11px] font-bold" id="infoVal">--</div>
                 
-                <div class="grid grid-cols-1 gap-3 mt-6">
-                    <button onclick="send('wa')" class="btn-animate w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3">
-                        <i class="fa-brands fa-whatsapp text-2xl text-green-500"></i> RÉSERVER MAINTENANT
-                    </button>
-                </div>
+                <button onclick="send()" class="btn-click w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 mt-6 transition">
+                    <i class="fa-brands fa-whatsapp text-2xl text-green-500"></i> RÉSERVER MAINTENANT
+                </button>
             </div>
         </div>
     </main>
 
-    <footer class="mt-auto py-8 text-center opacity-40">
-        <p class="text-[9px] font-bold uppercase tracking-[0.5em]">KLAK Premium Network</p>
-    </footer>
-
     <script>
-        let coords = { start: null, end: null };
+        let allCoords = { start: null, end: null, stops: {} };
         const myNum = '33650011771';
 
         function addStop() {
-            const container = document.getElementById('stopsContainer');
+            const id = 'stop_' + Date.now();
             const div = document.createElement('div');
             div.className = 'stop-item relative';
             div.innerHTML = `
                 <div class="input-wrap">
                     <i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-5"></i>
-                    <input type="text" class="addr-input stop-input" placeholder="Adresse de l'étape">
-                    <button onclick="this.parentElement.parentElement.remove()" class="pr-4 text-red-500/50 hover:text-red-500 transition"><i class="fa-solid fa-trash-can"></i></button>
+                    <input type="text" class="addr-input stop-input" id="${id}" placeholder="Adresse de l'étape" data-type="stop">
+                    <button onclick="deleteStop('${id}', this)" class="pr-4 text-red-500/50"><i class="fa-solid fa-trash"></i></button>
                 </div>
                 <div class="suggestion-box"></div>
             `;
-            container.appendChild(div);
+            document.getElementById('stopsContainer').appendChild(div);
             initAutocomplete();
         }
 
-        async function getLocation() {
-            navigator.geolocation.getCurrentPosition(async (p) => {
-                const res = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${p.coords.longitude}&lat=${p.coords.latitude}`);
-                const data = await res.json();
-                if(data.features[0]) {
-                    document.getElementById('startInput').value = data.features[0].properties.label;
-                    coords.start = data.features[0].geometry.coordinates;
-                }
-            });
+        function deleteStop(id, btn) {
+            delete allCoords.stops[id];
+            btn.parentElement.parentElement.remove();
         }
 
         function initAutocomplete() {
             document.querySelectorAll('.addr-input').forEach(el => {
                 const box = el.parentElement.nextElementSibling;
                 el.oninput = async () => {
-                    if(el.value.length < 3) { box.style.display='none'; return; }
+                    if(el.value.length < 3) return;
                     const r = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(el.value)}&limit=4`);
                     const d = await r.json();
                     box.innerHTML = d.features.map(f => `<div class="suggestion-item">${f.properties.label}</div>`).join('');
@@ -131,8 +115,10 @@
                     box.querySelectorAll('.suggestion-item').forEach((item, i) => {
                         item.onclick = () => {
                             el.value = d.features[i].properties.label;
-                            if(el.id === 'startInput') coords.start = d.features[i].geometry.coordinates;
-                            if(el.id === 'endInput') coords.end = d.features[i].geometry.coordinates;
+                            const coords = d.features[i].geometry.coordinates;
+                            if(el.dataset.type === 'start') allCoords.start = coords;
+                            else if(el.dataset.type === 'end') allCoords.end = coords;
+                            else allCoords.stops[el.id] = coords;
                             box.style.display = 'none';
                         };
                     });
@@ -141,35 +127,80 @@
         }
         initAutocomplete();
 
-        function calculate() {
-            if(!coords.start || !coords.end) return alert("Sélectionnez les adresses proposées");
-            const d = Math.sqrt(Math.pow(coords.end[1]-coords.start[1], 2) + Math.pow(coords.end[0]-coords.start[0], 2)) * 111 * 1.3;
-            const t = Math.round(d * 1.7 + 5);
-            const stops = document.querySelectorAll('.stop-input').length;
-            const p = Math.ceil((d < 5 ? 12 : 5 + (d * 1.6)) + (stops * 5));
-            
-            const resDiv = document.getElementById('result');
-            resDiv.classList.remove('hidden');
-            document.getElementById('pVal').innerText = p + " €";
-            document.getElementById('infoVal').innerText = d.toFixed(1) + " KM | " + t + " MIN ENV.";
-            resDiv.scrollIntoView({ behavior: 'smooth' });
+        // Calcul distance entre 2 points avec coef 1.5
+        function getDist(c1, c2) {
+            if(!c1 || !c2) return 0;
+            const deg2rad = d => d * (Math.PI/180);
+            const R = 6371;
+            const dLat = deg2rad(c2[1]-c1[1]);
+            const dLon = deg2rad(c2[0]-c1[0]);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(c1[1])) * Math.cos(deg2rad(c2[1])) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (R * c) * 1.5; 
         }
 
-        function send(type) {
+        function calculate() {
+            if(!allCoords.start || !allCoords.end) return alert("Précisez les adresses");
+            
+            let totalDist = 0;
+            let currentPos = allCoords.start;
+            const stopInputs = document.querySelectorAll('.stop-input');
+            
+            // Cumul : Départ -> Arrêts -> Destination
+            stopInputs.forEach(input => {
+                const stopCoord = allCoords.stops[input.id];
+                if(stopCoord) {
+                    totalDist += getDist(currentPos, stopCoord);
+                    currentPos = stopCoord;
+                }
+            });
+            totalDist += getDist(currentPos, allCoords.end);
+            
+            const numStops = stopInputs.length;
+            let finalPrice = 0;
+
+            // Application de ta règle tarifaire
+            if (totalDist < 5) {
+                finalPrice = 10;
+            } else {
+                finalPrice = 3 + (totalDist * 1.40);
+            }
+
+            // Ajout des arrêts (2€ chaque)
+            finalPrice += (numStops * 2);
+
+            document.getElementById('pVal').innerText = Math.ceil(finalPrice) + " €";
+            document.getElementById('infoVal').innerText = totalDist.toFixed(1) + " KM | " + Math.round(totalDist * 2 + 5) + " MIN ENV.";
+            document.getElementById('result').classList.remove('hidden');
+        }
+
+        function send() {
             const s = document.getElementById('startInput').value;
             const e = document.getElementById('endInput').value;
-            const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value);
+            const stopNames = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v !== "");
             const p = document.getElementById('pVal').innerText;
+            const d = document.getElementById('infoVal').innerText;
             
-            // Correction Liens Itinéraire complet
-            const wazeUrl = `https://waze.com/ul?ll=${coords.end[1]},${coords.end[0]}&navigate=yes&from=${encodeURIComponent(s)}`;
-            const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}`;
+            const waypoints = stopNames.join('|');
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(waypoints)}&travelmode=driving`;
+            const wazeUrl = `https://waze.com/ul?q=${encodeURIComponent(e)}&navigate=yes`;
 
-            let msg = `🚕 *NOUVELLE COURSE KLAK*\n\n📍 *DE :* ${s}\n`;
-            if(stops.length > 0) msg += `🛑 *ÉTAPES :* ${stops.join(' | ')}\n`;
-            msg += `🏁 *VERS :* ${e}\n💰 *PRIX FIXE : ${p}*\n\n🛰️ *GPS (DÉPART -> ARRIVÉE) :*\nGoogle Maps : ${mapsUrl}\nWaze : ${wazeUrl}`;
+            let msg = `🚕 *NOUVELLE RÉSA KLAK*\n\n📍 *DÉPART :* ${s}\n`;
+            if(stopNames.length > 0) msg += `🛑 *ARRÊTS :* ${stopNames.join(' -> ')}\n`;
+            msg += `🏁 *DESTINATION :* ${e}\n📏 *INFOS :* ${d}\n💰 *PRIX FIXE : ${p}*\n\n🛰️ *GPS :* ${mapsUrl}`;
 
             window.open(`https://wa.me/${myNum}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        async function getLocation() {
+            navigator.geolocation.getCurrentPosition(async (p) => {
+                const res = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${p.coords.longitude}&lat=${p.coords.latitude}`);
+                const data = await res.json();
+                if(data.features[0]) {
+                    document.getElementById('startInput').value = data.features[0].properties.label;
+                    allCoords.start = data.features[0].geometry.coordinates;
+                }
+            });
         }
     </script>
 </body>
