@@ -3,104 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLAK - VTC Premium</title>
+    <title>KLAK - Votre Chauffeur Privé</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         :root { --klak-gold: #fbbf24; }
-        body { background: radial-gradient(circle at top, #1a1a1a 0%, #000000 100%); color: white; min-height: 100vh; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; }
-        
-        /* Animation du bouton */
-        .pulse-button { animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
-        }
+        body { background: #000; color: white; margin: 0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
-        .suggestion-box { position: absolute; z-index: 100; width: 100%; background: white; color: black; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); margin-top: 5px;}
-        .suggestion-item { padding: 14px; cursor: pointer; border-bottom: 1px solid #f1f1f1; font-size: 14px; transition: 0.2s; }
-        .suggestion-item:hover { background: var(--klak-gold); color: black; }
-        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-        
-        .fade-in-up { animation: fadeInUp 0.6s ease-out both; }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* SPLASH SCREEN */
+        #splash {
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #1a1a1a, #000);
+            z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+        .snap-icon { font-size: 80px; animation: snapAnim 1s ease-in-out infinite alternate; }
+        @keyframes snapAnim { from { transform: scale(1); } to { transform: scale(1.2) rotate(10deg); } }
+
+        /* APP INTERFACE */
+        .glass-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 32px; }
+        .input-group { position: relative; transition: all 0.3s; }
+        .input-group:focus-within { transform: translateX(5px); }
+        
+        .line-connector { position: absolute; left: 23px; top: 45px; bottom: -20px; width: 2px; background: linear-gradient(to bottom, var(--klak-gold), transparent); z-index: 0; }
+        
+        .suggestion-box { 
+            position: absolute; z-index: 100; width: 100%; background: #fff; color: #000; 
+            border-radius: 12px; display: none; max-height: 250px; overflow-y: auto; 
+            margin-top: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .suggestion-item { padding: 14px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; }
+        .suggestion-item:hover { background: var(--klak-gold); }
+
+        .btn-main {
+            background: var(--klak-gold); color: black; font-weight: 900; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-main:active { transform: scale(0.95); filter: brightness(1.2); }
+
+        .loader { width: 20px; height: 20px; border: 3px solid #000; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="p-4 flex flex-col items-center">
+<body>
 
-    <header class="animate__animated animate__zoomIn text-center mt-6">
-        <h1 class="text-7xl font-black italic tracking-tighter text-white">KLAK</h1>
-        <div class="h-1 w-12 bg-yellow-500 mx-auto rounded-full mb-8"></div>
-    </header>
+    <div id="splash">
+        <div class="snap-icon">👌</div>
+        <h1 class="text-6xl font-black italic mt-4 animate__animated animate__pulse animate__infinite">KLAK</h1>
+        <p class="text-gray-400 mt-2 tracking-[0.5em] uppercase text-[10px]">Votre chauffeur est là</p>
+    </div>
 
-    <div class="glass w-full max-w-lg p-6 md:p-8 space-y-6 shadow-2xl animate__animated animate__fadeInUp">
-        
-        <div id="route-points" class="space-y-4">
-            <div class="relative group">
-                <label class="text-yellow-500 text-[10px] uppercase font-bold tracking-widest ml-1">Départ</label>
-                <div class="flex items-center bg-white/5 rounded-2xl px-4 py-4 border border-white/10 group-focus-within:border-yellow-500/50 transition-all">
-                    <i class="fa-solid fa-circle-dot text-yellow-500 mr-4"></i>
-                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Où vous récupère-t-on ?" data-type="start">
+    <div id="app" class="hidden min-h-screen p-4 flex flex-col items-center pb-12">
+        <header class="text-center my-8 animate__animated animate__fadeIn">
+            <h1 class="text-5xl font-black italic tracking-tighter">KLAK</h1>
+            <p class="text-[9px] text-yellow-500 uppercase tracking-widest font-bold">Premium VTC Service</p>
+        </header>
+
+        <main class="glass-card w-full max-w-lg p-6 md:p-10 space-y-8 animate__animated animate__fadeInUp">
+            
+            <div class="space-y-6 relative">
+                <div class="input-group">
+                    <div class="line-connector"></div>
+                    <label class="text-yellow-500 text-[10px] uppercase font-black ml-1 mb-2 block">Point de départ</label>
+                    <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/5">
+                        <i class="fa-solid fa-circle text-[10px] text-yellow-500 mr-4"></i>
+                        <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Saisir l'adresse..." data-type="start">
+                    </div>
+                    <div class="suggestion-box"></div>
                 </div>
-                <div class="suggestion-box"></div>
+
+                <div id="steps-container" class="space-y-6"></div>
+
+                <button onclick="addStep()" class="text-yellow-500 text-[11px] font-black flex items-center gap-2 hover:opacity-70 transition ml-1">
+                    <i class="fa-solid fa-plus-circle text-lg"></i> AJOUTER UN ARRÊT
+                </button>
+
+                <div class="input-group">
+                    <label class="text-yellow-500 text-[10px] uppercase font-black ml-1 mb-2 block">Destination</label>
+                    <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/5">
+                        <i class="fa-solid fa-location-arrow text-gray-400 mr-4"></i>
+                        <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Où allez-vous ?" data-type="end">
+                    </div>
+                    <div class="suggestion-box"></div>
+                </div>
             </div>
 
-            <div id="steps-container" class="space-y-4"></div>
+            <div class="input-group">
+                <label class="text-yellow-500 text-[10px] uppercase font-black ml-1 mb-2 block">Horaire</label>
+                <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/5">
+                    <i class="fa-solid fa-clock text-gray-500 mr-4"></i>
+                    <input type="datetime-local" id="timeInput" class="bg-transparent w-full outline-none text-sm text-white">
+                </div>
+            </div>
 
-            <button onclick="addStep()" class="text-yellow-500/80 text-xs font-bold flex items-center gap-2 hover:text-white transition-all scale-95 hover:scale-100 origin-left">
-                <i class="fa-solid fa-plus-circle"></i> Ajouter un arrêt intermédiaire
+            <button onclick="processCalculation()" id="calcBtn" class="btn-main w-full py-5 rounded-2xl shadow-xl uppercase tracking-tighter text-lg pulse-button">
+                Calculer le trajet
             </button>
 
-            <div class="relative group">
-                <label class="text-yellow-500 text-[10px] uppercase font-bold tracking-widest ml-1">Arrivée</label>
-                <div class="flex items-center bg-white/5 rounded-2xl px-4 py-4 border border-white/10 group-focus-within:border-yellow-500/50 transition-all">
-                    <i class="fa-solid fa-location-arrow text-gray-400 mr-4"></i>
-                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Quelle est votre destination ?" data-type="end">
-                </div>
-                <div class="suggestion-box"></div>
+            <div id="priceDisplay" class="hidden animate__animated animate__zoomIn bg-yellow-500 text-black p-8 rounded-[32px] text-center shadow-2xl shadow-yellow-500/20">
+                <p class="text-[10px] uppercase font-black opacity-60">Estimation Total</p>
+                <div class="text-6xl font-black my-1" id="priceVal">0 €</div>
+                <p class="text-[11px] font-bold" id="distDetail">-- km de trajet</p>
             </div>
-        </div>
 
-        <div class="relative group">
-            <label class="text-yellow-500 text-[10px] uppercase font-bold tracking-widest ml-1">Date & Heure</label>
-            <div class="flex items-center bg-white/5 rounded-2xl px-4 py-4 border border-white/10 group-focus-within:border-yellow-500/50 transition">
-                <i class="fa-solid fa-clock text-gray-500 mr-4"></i>
-                <input type="datetime-local" id="timeInput" class="bg-transparent w-full outline-none text-sm text-white">
-            </div>
-        </div>
-
-        <button onclick="calculateFullRide()" class="pulse-button w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-5 rounded-2xl transition-all active:scale-95 uppercase tracking-widest text-sm">
-            Estimer le trajet
-        </button>
-
-        <div id="priceDisplay" class="hidden fade-in-up glass bg-yellow-500/10 border-yellow-500/30 p-8 rounded-3xl text-center">
-            <p class="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Total estimé</p>
-            <div class="flex items-center justify-center gap-2">
-                <span class="text-5xl font-black text-white" id="priceVal">0 €</span>
-            </div>
-            <p class="text-yellow-500/60 text-[10px] mt-2" id="distDetail">-- km</p>
-        </div>
-
-        <div id="orderZone" class="hidden space-y-4">
-            <p class="text-center text-[10px] text-gray-500 uppercase font-bold tracking-widest">Choisir mon chauffeur</p>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="sendWA('336XXXXXXXX')" class="bg-white text-black p-5 rounded-2xl font-black text-xs hover:invert transition-all transform hover:-translate-y-1">
-                    <i class="fa-solid fa-user-tie mb-2 block text-lg"></i> Chauffeur 1
+            <div id="orderZone" class="hidden grid grid-cols-2 gap-4 animate__animated animate__fadeInUp">
+                <button onclick="sendWA('33XXXXXXXXX')" class="bg-white text-black p-6 rounded-3xl font-black text-xs hover:scale-105 transition-all">
+                    <i class="fa-solid fa-crown text-xl mb-2 block"></i> LUXE 1
                 </button>
-                <button onclick="sendWA('336XXXXXXXX')" class="bg-white text-black p-5 rounded-2xl font-black text-xs hover:invert transition-all transform hover:-translate-y-1">
-                    <i class="fa-solid fa-user-tie mb-2 block text-lg"></i> Chauffeur 2
+                <button onclick="sendWA('33XXXXXXXXX')" class="bg-white text-black p-6 rounded-3xl font-black text-xs hover:scale-105 transition-all">
+                    <i class="fa-solid fa-bolt text-xl mb-2 block"></i> RAPIDE 2
                 </button>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
+        setTimeout(() => {
+            document.getElementById('splash').classList.add('animate__animated', 'animate__fadeOut');
+            setTimeout(() => {
+                document.getElementById('splash').style.display = 'none';
+                document.getElementById('app').classList.remove('hidden');
+            }, 500);
+        }, 3000);
+
         let routeCoords = { start: null, end: null, steps: [] };
 
         function initInput(el) {
@@ -138,39 +162,46 @@
             const index = routeCoords.steps.length;
             routeCoords.steps.push(null);
             const div = document.createElement('div');
-            div.className = 'relative group animate__animated animate__fadeInDown';
+            div.className = 'input-group animate__animated animate__fadeInLeft';
             div.innerHTML = `
-                <label class="text-yellow-500/70 text-[10px] uppercase font-bold ml-1">Arrêt</label>
-                <div class="flex items-center bg-white/5 rounded-2xl px-4 py-4 border border-white/10 group-focus-within:border-yellow-500/50 transition">
-                    <i class="fa-solid fa-pause text-gray-600 mr-4 text-xs"></i>
-                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Adresse de l'arrêt..." data-type="step" data-index="${index}">
-                    <button onclick="this.parentElement.parentElement.remove(); routeCoords.steps[${index}]=null;" class="text-gray-500 hover:text-red-500 ml-2"><i class="fa-solid fa-xmark"></i></button>
+                <div class="line-connector"></div>
+                <label class="text-yellow-500/70 text-[10px] uppercase font-black ml-1 mb-2 block">Arrêt</label>
+                <div class="flex items-center bg-white/5 rounded-2xl px-5 py-4 border border-white/5">
+                    <i class="fa-solid fa-circle-dot text-gray-500 mr-4 text-[10px]"></i>
+                    <input type="text" class="addr-input bg-transparent w-full outline-none text-sm" placeholder="Adresse arrêt..." data-type="step" data-index="${index}">
+                    <button onclick="this.parentElement.parentElement.remove();" class="text-red-500 ml-2"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
                 <div class="suggestion-box"></div>`;
             container.appendChild(div);
             initInput(div.querySelector('.addr-input'));
         }
 
+        function processCalculation() {
+            const btn = document.getElementById('calcBtn');
+            btn.innerHTML = '<span class="loader"></span>';
+            setTimeout(() => {
+                calculateFullRide();
+                btn.innerHTML = 'Recalculer';
+                btn.classList.remove('pulse-button');
+            }, 1000);
+        }
+
         function calculateDistance(c1, c2) {
-            return Math.sqrt(Math.pow(c2[1]-c1[1], 2) + Math.pow(c2[0]-c1[0], 2)) * 111 * 1.3;
+            return Math.sqrt(Math.pow(c2[1]-c1[1], 2) + Math.pow(c2[0]-c1[0], 2)) * 111 * 1.35;
         }
 
         function calculateFullRide() {
-            if(!routeCoords.start || !routeCoords.end) { return; }
+            if(!routeCoords.start || !routeCoords.end) { alert("D'où partez-vous ?"); return; }
             let totalDist = 0;
             let currentPos = routeCoords.start;
             routeCoords.steps.forEach(s => { if(s) { totalDist += calculateDistance(currentPos, s); currentPos = s; } });
             totalDist += calculateDistance(currentPos, routeCoords.end);
             let prix = totalDist < 5 ? 10 : 3 + (totalDist * 1.3);
             
-            document.getElementById('distDetail').innerText = totalDist.toFixed(1) + " km de trajet total";
+            document.getElementById('distDetail').innerText = totalDist.toFixed(1) + " KM DE TRAJET";
             document.getElementById('priceVal').innerText = Math.ceil(prix) + " €";
-            
-            const pDisp = document.getElementById('priceDisplay');
-            const oZone = document.getElementById('orderZone');
-            pDisp.classList.remove('hidden');
-            oZone.classList.remove('hidden');
-            oZone.classList.add('fade-in-up');
+            document.getElementById('priceDisplay').classList.remove('hidden');
+            document.getElementById('orderZone').classList.remove('hidden');
         }
 
         function sendWA(num) {
@@ -180,7 +211,7 @@
             trajet += `🏁 ARRIVEE : ${inputs[inputs.length-1].value}`;
             const prix = document.getElementById('priceVal').innerText;
             const time = document.getElementById('timeInput').value.replace('T', ' à ');
-            const msg = `🚕 *RESERVATION KLAK*%0A📅 *HEURE :* ${time}%0A${trajet}%0A💰 *PRIX ESTIMÉ : ${prix}*`;
+            const msg = `🚕 *NOUVELLE COURSE KLAK*%0A📅 *HEURE :* ${time}%0A${trajet}%0A💰 *PRIX ESTIMÉ : ${prix}*`;
             window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
         }
 
