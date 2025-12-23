@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>KLAK - Réservations VTC</title>
+    <title>KLAK - Transport Professionnel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,11 +11,10 @@
         
         body { background: #000; color: white; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* Animations fluides iOS/Android */
+        /* Animations */
         @keyframes snapIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
+        
         #klak-loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.6s ease 2.2s forwards; }
         .snap-emoji { font-size: 80px; animation: snapIn 0.5s ease-out; }
         .klak-text { color: #fbbf24; font-weight: 900; font-size: 2.5rem; font-style: italic; letter-spacing: -2px; margin-top: 10px; }
@@ -26,7 +25,7 @@
         
         .input-wrap { background: rgba(255,255,255,0.08); border-radius: 18px; display: flex; align-items: center; transition: 0.3s; border: 1px solid transparent; }
         .input-wrap:focus-within { border-color: #fbbf24; background: rgba(255,255,255,0.12); }
-        input { background: transparent; width: 100%; outline: none; color: white; padding: 16px; font-size: 16px; } /* 16px évite le zoom auto sur iPhone */
+        input { background: transparent; width: 100%; outline: none; color: white; padding: 16px; font-size: 16px; }
         
         .invoice-card { animation: snapIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
@@ -44,8 +43,8 @@
                 <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fa-solid fa-check text-3xl"></i>
                 </div>
-                <h2 class="text-2xl font-black italic uppercase">Demande Confirmée</h2>
-                <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">Récapitulatif de votre trajet</p>
+                <h2 class="text-2xl font-black italic uppercase">Demande Reçue</h2>
+                <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">Récapitulatif KLAK</p>
             </div>
             
             <div class="space-y-4 border-y border-dashed border-gray-200 py-6">
@@ -55,27 +54,27 @@
             </div>
 
             <div class="bg-yellow-50 p-4 rounded-2xl">
-                <p class="text-[11px] text-yellow-800 font-bold text-center leading-relaxed italic animate-pulse">
-                    <i class="fa-solid fa-bell mr-2"></i>Un chauffeur vous contacte par SMS/WhatsApp immédiatement pour confirmer son arrivée.
+                <p class="text-[11px] text-yellow-800 font-bold text-center leading-relaxed italic">
+                    <i class="fa-solid fa-bell animate-bounce mr-2"></i>Un chauffeur vous contacte par SMS/WhatsApp immédiatement pour confirmer.
                 </p>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest active:scale-95 transition">Fermer</button>
+            <button onclick="location.reload()" class="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest">Fermer</button>
         </div>
     </div>
 
     <header class="text-center py-6">
         <h1 class="text-7xl font-black italic tracking-tighter text-white">KLAK</h1>
         <div class="flex items-center justify-center gap-2 mt-2">
-            <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span class="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Service Chauffeur Privé</span>
+            <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
+            <span class="text-[10px] font-black text-gray-500 uppercase tracking-[3px]">Service Premium 24/7</span>
         </div>
     </header>
 
-    <main class="glass p-6 space-y-5">
+    <main class="glass p-6 space-y-5 shadow-2xl">
         <div class="relative">
             <div class="flex justify-between items-end mb-2 px-1">
-                <label class="text-[10px] font-black text-gray-500 uppercase">Départ</label>
+                <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Départ</label>
                 <button onclick="getCurrentLocation()" class="text-[10px] font-black text-yellow-500 uppercase flex items-center gap-1">
                     <i class="fa-solid fa-location-crosshairs"></i> Ma position
                 </button>
@@ -102,22 +101,22 @@
         </div>
 
         <div class="relative">
-            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1">Votre Numéro de téléphone</label>
+            <label class="text-[10px] font-black text-gray-500 uppercase block mb-2 px-1">Votre Numéro (Pour le chauffeur)</label>
             <div class="input-wrap">
                 <i class="fa-solid fa-phone text-gray-400 mx-4 text-sm"></i>
                 <input type="tel" id="phoneInput" placeholder="06 00 00 00 00" maxlength="14">
             </div>
         </div>
 
-        <button onclick="calculate()" class="w-full bg-yellow-500 text-black py-5 rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition">Calculer mon tarif</button>
+        <button onclick="calculate()" class="w-full bg-yellow-500 text-black py-5 rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition">Calculer le prix</button>
 
-        <div id="result" class="hidden mt-6 bg-white text-black p-8 rounded-[35px] text-center shadow-2xl animate-[snapIn_0.3s_ease-out]">
+        <div id="result" class="hidden mt-6 bg-white text-black p-8 rounded-[35px] text-center shadow-2xl animate-[snapIn_0.3s_ease]">
             <div class="text-[10px] font-black opacity-30 uppercase tracking-[3px] mb-2">Prix Fixe Garanti</div>
             <div class="text-7xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
-            <div class="inline-block bg-gray-100 px-5 py-2 rounded-full text-[11px] font-black" id="infoVal">-- KM</div>
+            <div class="inline-block bg-gray-100 px-5 py-2 rounded-full text-[11px] font-black uppercase" id="infoVal">-- KM</div>
             
             <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 mt-8 active:scale-95 transition">
-                <i class="fa-solid fa-bolt text-yellow-500"></i> RÉSERVER LA COURSE
+                <i class="fa-solid fa-bolt text-yellow-500"></i> RÉSERVER MAINTENANT
             </button>
         </div>
     </main>
@@ -145,13 +144,11 @@
         function addStop() {
             const div = document.createElement('div');
             div.className = 'relative animate-[snapIn_0.2s_ease-out]';
-            div.innerHTML = `
-                <div class="input-wrap">
-                    <i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-5"></i>
-                    <input type="text" class="addr-input stop-input" placeholder="Adresse de l'étape">
-                    <button onclick="this.parentElement.parentElement.remove()" class="pr-4 text-red-400"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="suggestion-box"></div>`;
+            div.innerHTML = `<div class="input-wrap mt-2">
+                <i class="fa-solid fa-ellipsis-vertical text-gray-600 mx-5"></i>
+                <input type="text" class="addr-input stop-input" placeholder="Adresse étape" autocomplete="off">
+                <button onclick="this.parentElement.parentElement.remove()" class="pr-4 text-red-400"><i class="fa-solid fa-xmark"></i></button>
+            </div><div class="suggestion-box"></div>`;
             document.getElementById('stopsContainer').appendChild(div);
             initAutocomplete();
         }
@@ -189,7 +186,7 @@
             
             const price = Math.max(15, 5 + (dist * 1.6));
             document.getElementById('pVal').innerText = Math.ceil(price) + " €";
-            document.getElementById('infoVal').innerText = dist.toFixed(1) + " KM ENV.";
+            document.getElementById('infoVal').innerText = dist.toFixed(1) + " KM";
             document.getElementById('result').classList.remove('hidden');
         }
 
@@ -200,38 +197,47 @@
             const p = document.getElementById('pVal').innerText;
             const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v);
 
-            if(!tel || tel.length < 10) return alert("Numéro de téléphone requis");
+            if(!tel || tel.length < 10) return alert("Numéro de téléphone invalide");
 
-            // Nettoyage pour WhatsApp et SMS
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let cleanTel = tel.replace(/\s/g, '').replace(/^0/, '33');
-            
-            // Liens universels (iOS/Android)
             const smsText = `Bonjour, c'est votre chauffeur KLAK. J'ai accepté votre course de ${s} vers ${e} (${p}). Je suis en route !`;
-            const smsUrl = `sms:${tel}${navigator.userAgent.match(/iPhone/i) ? '&' : '?'}body=${encodeURIComponent(smsText)}`;
+            const smsUrl = `sms:${tel}${isIOS ? '&' : '?'}body=${encodeURIComponent(smsText)}`;
             const waUrl = `https://wa.me/${cleanTel}?text=${encodeURIComponent(smsText)}`;
 
-            let msg = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n` +
-                      `📞 *CLIENT :* [${tel}](tel:${tel})\n` +
-                      `📍 *DÉPART :* ${s}\n` +
-                      (stops.length ? `🛑 *ÉTAPES :* ${stops.join(' / ')}\n` : '') +
-                      `🏁 *DESTINATION :* ${e}\n` +
-                      `💰 *TARIF : ${p}*\n\n` +
-                      `🌍 [OUVRIR LE GPS](https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(stops.join('|'))})`;
+            let textTelegram = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n` +
+                               `📞 *CLIENT :* [${tel}](tel:${tel})\n` +
+                               `📍 *DE :* ${s}\n` +
+                               (stops.length ? `🛑 *ÉTAPES :* ${stops.join(' / ')}\n` : '') +
+                               `🏁 *VERS :* ${e}\n` +
+                               `💰 *TARIF : ${p}*`;
 
             const keyboard = {
                 inline_keyboard: [
                     [{ text: "💬 RÉPONDRE PAR SMS", url: smsUrl }],
                     [{ text: "🟢 RÉPONDRE PAR WHATSAPP", url: waUrl }],
-                    [{ text: "📞 APPELER LE CLIENT", url: `tel:${tel}` }]
+                    [{ text: "📞 APPELER", url: `tel:${tel}` }]
                 ]
             };
 
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown&reply_markup=${JSON.stringify(keyboard)}`)
-            .then(() => {
-                document.getElementById('invPrice').innerText = p;
-                document.getElementById('invDist').innerText = document.getElementById('infoVal').innerText;
-                document.getElementById('invTel').innerText = tel;
-                document.getElementById('invoiceModal').classList.remove('hidden');
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: textTelegram,
+                    parse_mode: "Markdown",
+                    reply_markup: keyboard
+                })
+            }).then(res => {
+                if(res.ok) {
+                    document.getElementById('invPrice').innerText = p;
+                    document.getElementById('invDist').innerText = document.getElementById('infoVal').innerText;
+                    document.getElementById('invTel').innerText = tel;
+                    document.getElementById('invoiceModal').classList.remove('hidden');
+                } else {
+                    alert("Erreur d'envoi. Vérifiez la connexion.");
+                }
             });
         }
     </script>
