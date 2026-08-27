@@ -6,12 +6,21 @@
     <title>KLAK - Réservations</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <style>
         @keyframes snapIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
         #klak-loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.6s ease 2.2s forwards; }
         .snap-emoji { font-size: 80px; animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .klak-text { color: #fbbf24; font-weight: 900; font-size: 2.5rem; font-style: italic; letter-spacing: -2px; margin-top: 10px; }
+        
         body { background: #000; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; }
         .suggestion-box { position: absolute; z-index: 50; width: 100%; background: #fff; color: #000; border-radius: 12px; display: none; max-height: 200px; overflow-y: auto; }
@@ -19,78 +28,406 @@
         .input-wrap { background: rgba(255,255,255,0.08); border-radius: 18px; display: flex; align-items: center; transition: 0.3s; border: 1px solid transparent; }
         .input-wrap:focus-within { border-color: #fbbf24; }
         input { background: transparent; width: 100%; outline: none; color: white; padding: 14px; font-size: 14px; }
+        
+        .auth-page { animation: slideUp 0.5s ease; }
+        .hidden-page { display: none; }
+        
+        .google-btn { background: white; color: #333; transition: 0.3s; }
+        .google-btn:hover { background: #f5f5f5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        
+        .error-message {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid rgba(255,0,0,0.3);
+            color: #ff6b6b;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .success-message {
+            background: rgba(0,255,0,0.2);
+            border: 1px solid rgba(0,255,0,0.3);
+            color: #51cf66;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen max-w-lg mx-auto">
 
+    <!-- Loader -->
     <div id="klak-loader">
         <div class="snap-emoji">👌</div>
         <div class="klak-text">KLAK</div>
     </div>
 
-    <header class="text-center py-8">
-        <h1 class="text-7xl font-black italic tracking-tighter text-white">KLAK</h1>
-        <div class="h-1 w-20 bg-yellow-500 mx-auto mt-2 rounded-full"></div>
-    </header>
+    <!-- PAGE AUTHENTIFICATION -->
+    <div id="authPage" class="auth-page">
+        <header class="text-center py-8">
+            <h1 class="text-7xl font-black italic tracking-tighter text-white">KLAK</h1>
+            <div class="h-1 w-20 bg-yellow-500 mx-auto mt-2 rounded-full"></div>
+            <p class="text-gray-400 mt-4 text-sm">Connectez-vous pour réserver votre course</p>
+        </header>
 
-    <main class="glass p-6 space-y-4 shadow-2xl">
-        <div class="relative">
-            <div class="flex justify-between items-end mb-1">
-                <label class="text-[10px] font-black text-gray-500 uppercase px-1">Départ</label>
-                <button onclick="getCurrentLocation()" class="text-[9px] font-bold text-yellow-500 uppercase flex items-center gap-1 mb-1">
-                    <i class="fa-solid fa-location-crosshairs"></i> Ma position
+        <main class="glass p-6 space-y-4 shadow-2xl">
+            <!-- Mode connexion -->
+            <div id="loginForm">
+                <h2 class="text-2xl font-black text-center mb-6">CONNEXION</h2>
+                
+                <!-- Bouton Google -->
+                <button onclick="signInWithGoogle()" class="google-btn w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition">
+                    <i class="fa-brands fa-google text-xl"></i>
+                    Continuer avec Google
+                </button>
+                
+                <div class="flex items-center gap-4 my-4">
+                    <div class="flex-1 h-px bg-gray-700"></div>
+                    <span class="text-xs text-gray-500">OU</span>
+                    <div class="flex-1 h-px bg-gray-700"></div>
+                </div>
+                
+                <!-- Email -->
+                <div class="input-wrap mt-4">
+                    <i class="fa-solid fa-envelope text-gray-500 mx-4"></i>
+                    <input type="email" id="loginEmail" placeholder="Email">
+                </div>
+                
+                <!-- Mot de passe -->
+                <div class="input-wrap mt-4">
+                    <i class="fa-solid fa-lock text-gray-500 mx-4"></i>
+                    <input type="password" id="loginPassword" placeholder="Mot de passe">
+                </div>
+                
+                <div id="loginError" class="error-message hidden-page"></div>
+                
+                <button onclick="loginWithEmail()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm mt-4 active:scale-95 transition">
+                    Se connecter
+                </button>
+                
+                <p class="text-center text-sm mt-4">
+                    <span class="text-gray-400">Pas de compte ?</span>
+                    <button onclick="showRegister()" class="text-yellow-500 font-bold ml-1">S'inscrire</button>
+                </p>
+            </div>
+            
+            <!-- Mode inscription -->
+            <div id="registerForm" class="hidden-page">
+                <h2 class="text-2xl font-black text-center mb-6">INSCRIPTION</h2>
+                
+                <button onclick="signInWithGoogle()" class="google-btn w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition">
+                    <i class="fa-brands fa-google text-xl"></i>
+                    Inscription avec Google
+                </button>
+                
+                <div class="flex items-center gap-4 my-4">
+                    <div class="flex-1 h-px bg-gray-700"></div>
+                    <span class="text-xs text-gray-500">OU</span>
+                    <div class="flex-1 h-px bg-gray-700"></div>
+                </div>
+                
+                <!-- Prénom -->
+                <div class="input-wrap mt-4">
+                    <i class="fa-solid fa-user text-gray-500 mx-4"></i>
+                    <input type="text" id="registerName" placeholder="Prénom">
+                </div>
+                
+                <!-- Téléphone -->
+                <div class="input-wrap mt-4">
+                    <i class="fa-solid fa-phone text-gray-500 mx-4"></i>
+                    <input type="tel" id="registerPhone" placeholder="Téléphone (ex: 0612345678)">
+                </div>
+                
+                <!-- Email -->
+                <div class="input-wrap mt-4">
+                    <i class="fa-solid fa-envelope text-gray-500 mx-4"></i>
+                    <input type="email" id="registerEmail" placeholder="Email">
+                </div>
+                
+                <!-- Mot de passe -->
+                <div class="input-wrap mt-4">
+                    <i class="fa-solid fa-lock text-gray-500 mx-4"></i>
+                    <input type="password" id="registerPassword" placeholder="Mot de passe (6 caractères min.)">
+                </div>
+                
+                <div id="registerError" class="error-message hidden-page"></div>
+                
+                <button onclick="registerWithEmail()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm mt-4 active:scale-95 transition">
+                    Créer mon compte
+                </button>
+                
+                <p class="text-center text-sm mt-4">
+                    <span class="text-gray-400">Déjà un compte ?</span>
+                    <button onclick="showLogin()" class="text-yellow-500 font-bold ml-1">Se connecter</button>
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <!-- PAGE RÉSERVATION -->
+    <div id="reservationPage" class="hidden-page">
+        <header class="text-center py-8 relative">
+            <button onclick="logout()" class="absolute right-0 top-8 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-right-from-bracket text-xl"></i>
+            </button>
+            <h1 class="text-7xl font-black italic tracking-tighter text-white">KLAK</h1>
+            <div class="h-1 w-20 bg-yellow-500 mx-auto mt-2 rounded-full"></div>
+            <p class="text-gray-400 mt-4 text-sm">Bienvenue <span id="userName" class="text-yellow-500 font-bold"></span> 👋</p>
+        </header>
+
+        <main class="glass p-6 space-y-4 shadow-2xl">
+            <div class="relative">
+                <div class="flex justify-between items-end mb-1">
+                    <label class="text-[10px] font-black text-gray-500 uppercase px-1">Départ</label>
+                    <button onclick="getCurrentLocation()" class="text-[9px] font-bold text-yellow-500 uppercase flex items-center gap-1 mb-1">
+                        <i class="fa-solid fa-location-crosshairs"></i> Ma position
+                    </button>
+                </div>
+                <div class="input-wrap">
+                    <i class="fa-solid fa-circle text-[8px] text-yellow-500 mx-4"></i>
+                    <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ">
+                </div>
+                <div class="suggestion-box"></div>
+            </div>
+
+            <div id="stopsContainer"></div>
+            
+            <button onclick="addStop()" class="text-[11px] font-black text-yellow-500 uppercase flex items-center gap-2 py-2">
+                <i class="fa-solid fa-circle-plus text-lg"></i> Ajouter une étape
+            </button>
+
+            <div class="relative">
+                <label class="text-[10px] font-black text-gray-500 uppercase px-1">Destination</label>
+                <div class="input-wrap">
+                    <i class="fa-solid fa-location-dot text-gray-500 mx-4 text-sm"></i>
+                    <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?">
+                </div>
+                <div class="suggestion-box"></div>
+            </div>
+
+            <button onclick="calculate()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition">
+                Calculer le prix
+            </button>
+
+            <div id="result" class="hidden mt-4 bg-white text-black p-8 rounded-[35px] text-center shadow-2xl">
+                <div class="text-[10px] font-black opacity-30 uppercase mb-1">Tarif Fixe</div>
+                <div class="text-6xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
+                <div class="inline-block bg-gray-100 px-4 py-2 rounded-full text-[11px] font-bold" id="infoVal">--</div>
+                
+                <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 mt-6 active:scale-95 transition">
+                    <i id="btnIcon" class="fa-solid fa-check-circle text-2xl text-yellow-500"></i> 
+                    <span id="btnText">RÉSERVER MA COURSE</span>
                 </button>
             </div>
-            <div class="input-wrap">
-                <i class="fa-solid fa-circle text-[8px] text-yellow-500 mx-4"></i>
-                <input type="text" id="startInput" class="addr-input" placeholder="Adresse de départ">
-            </div>
-            <div class="suggestion-box"></div>
-        </div>
-
-        <div id="stopsContainer"></div>
-        
-        <button onclick="addStop()" class="text-[11px] font-black text-yellow-500 uppercase flex items-center gap-2 py-2">
-            <i class="fa-solid fa-circle-plus text-lg"></i> Ajouter une étape
-        </button>
-
-        <div class="relative">
-            <label class="text-[10px] font-black text-gray-500 uppercase px-1">Destination</label>
-            <div class="input-wrap">
-                <i class="fa-solid fa-location-dot text-gray-500 mx-4 text-sm"></i>
-                <input type="text" id="endInput" class="addr-input" placeholder="Où allez-vous ?">
-            </div>
-            <div class="suggestion-box"></div>
-        </div>
-
-        <div class="relative">
-            <label class="text-[10px] font-black text-gray-500 uppercase px-1">Numéro de téléphone</label>
-            <div class="input-wrap">
-                <i class="fa-solid fa-phone text-gray-500 mx-4 text-sm"></i>
-                <input type="tel" id="phoneInput" placeholder="06 00 00 00 00">
-            </div>
-        </div>
-
-        <button onclick="calculate()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition">
-            Calculer le prix
-        </button>
-
-        <div id="result" class="hidden mt-4 bg-white text-black p-8 rounded-[35px] text-center shadow-2xl">
-            <div class="text-[10px] font-black opacity-30 uppercase mb-1">Tarif Fixe</div>
-            <div class="text-6xl font-black tracking-tighter mb-2" id="pVal">-- €</div>
-            <div class="inline-block bg-gray-100 px-4 py-2 rounded-full text-[11px] font-bold" id="infoVal">--</div>
-            
-            <button id="sendBtn" onclick="send()" class="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 mt-6 active:scale-95 transition">
-                <i id="btnIcon" class="fa-solid fa-check-circle text-2xl text-yellow-500"></i> <span id="btnText">RÉSERVER MA COURSE</span>
-            </button>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0nkbnJHjgkJaI8sTGKtgoasqBHUU9D1M",
+            authDomain: "klaknow.firebaseapp.com",
+            projectId: "klaknow",
+            storageBucket: "klaknow.firebasestorage.app",
+            messagingSenderId: "732881299219",
+            appId: "1:732881299219:web:d8ba36170b0b29b673dce6",
+            measurementId: "G-PQ9PMNXBG3"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         let allCoords = { start: null, end: null, stops: {} };
+        let currentUser = null;
+        
+        // Configuration Telegram
         const botToken = "8548242544:AAEBmzM8-wj0AHtaWVpkgmKoLq_Y9btfbCQ";
         const chatId = "-1003529719062";
 
+        // Gérer l'état de connexion
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserProfile(user);
+                showReservationPage();
+            } else {
+                currentUser = null;
+                showAuthPage();
+            }
+        });
+
+        // Charger le profil utilisateur
+        async function loadUserProfile(user) {
+            try {
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('userName').textContent = data.name || user.displayName || user.email;
+                } else {
+                    // Créer un profil par défaut
+                    const defaultProfile = {
+                        name: user.displayName || user.email?.split('@')[0] || 'Client',
+                        email: user.email,
+                        phone: user.phoneNumber || '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    await db.collection('users').doc(user.uid).set(defaultProfile);
+                    document.getElementById('userName').textContent = defaultProfile.name;
+                }
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
+                document.getElementById('userName').textContent = user.email;
+            }
+        }
+
+        // Connexion avec Google
+        async function signInWithGoogle() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                console.error('Erreur Google:', error);
+                showError('loginError', 'Erreur de connexion Google: ' + error.message);
+            }
+        }
+
+        // Inscription avec email
+        async function registerWithEmail() {
+            const name = document.getElementById('registerName').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+
+            // Validation
+            if (!name || !phone || !email || !password) {
+                showError('registerError', 'Veuillez remplir tous les champs');
+                return;
+            }
+
+            if (name.length < 2) {
+                showError('registerError', 'Le prénom doit contenir au moins 2 caractères');
+                return;
+            }
+
+            // Validation du téléphone français
+            const phoneRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
+            if (!phoneRegex.test(phone)) {
+                showError('registerError', 'Numéro de téléphone invalide');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('registerError', 'Le mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Sauvegarder le profil dans Firestore
+                await db.collection('users').doc(user.uid).set({
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                console.log('Inscription réussie');
+            } catch (error) {
+                console.error('Erreur inscription:', error);
+                let message = 'Erreur lors de l\'inscription';
+                if (error.code === 'auth/email-already-in-use') {
+                    message = 'Cet email est déjà utilisé';
+                } else if (error.code === 'auth/invalid-email') {
+                    message = 'Email invalide';
+                } else if (error.code === 'auth/weak-password') {
+                    message = 'Mot de passe trop faible';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    message = 'Inscription par email désactivée. Activez-la dans Firebase Console';
+                }
+                showError('registerError', message);
+            }
+        }
+
+        // Connexion avec email
+        async function loginWithEmail() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showError('loginError', 'Veuillez remplir tous les champs');
+                return;
+            }
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                console.log('Connexion réussie');
+            } catch (error) {
+                console.error('Erreur connexion:', error);
+                let message = 'Erreur de connexion';
+                if (error.code === 'auth/user-not-found') {
+                    message = 'Aucun compte avec cet email';
+                } else if (error.code === 'auth/wrong-password') {
+                    message = 'Mot de passe incorrect';
+                } else if (error.code === 'auth/invalid-email') {
+                    message = 'Email invalide';
+                } else if (error.code === 'auth/too-many-requests') {
+                    message = 'Trop de tentatives. Réessayez plus tard';
+                }
+                showError('loginError', message);
+            }
+        }
+
+        // Afficher les erreurs
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden-page');
+            setTimeout(() => {
+                element.classList.add('hidden-page');
+            }, 5000);
+        }
+
+        // Déconnexion
+        async function logout() {
+            try {
+                await auth.signOut();
+                console.log('Déconnexion réussie');
+            } catch (error) {
+                console.error('Erreur déconnexion:', error);
+            }
+        }
+
+        // Navigation entre formulaires
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden-page');
+            document.getElementById('registerForm').classList.remove('hidden-page');
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden-page');
+            document.getElementById('loginForm').classList.remove('hidden-page');
+        }
+
+        function showAuthPage() {
+            document.getElementById('reservationPage').classList.add('hidden-page');
+            document.getElementById('authPage').classList.remove('hidden-page');
+        }
+
+        function showReservationPage() {
+            document.getElementById('authPage').classList.add('hidden-page');
+            document.getElementById('reservationPage').classList.remove('hidden-page');
+        }
+
+        // === FONCTIONS DE RÉSERVATION ===
+        
         async function getCurrentLocation() {
             if (!navigator.geolocation) return alert("Géolocalisation non supportée");
             navigator.geolocation.getCurrentPosition(async (position) => {
@@ -154,23 +491,38 @@
             document.getElementById('result').classList.remove('hidden');
         }
 
-        function send() {
+        async function send() {
+            if (!currentUser) {
+                alert('Veuillez vous connecter');
+                return;
+            }
+
             const btn = document.getElementById('sendBtn');
             const btnText = document.getElementById('btnText');
             
             const s = document.getElementById('startInput').value;
             const e = document.getElementById('endInput').value;
-            const tel = document.getElementById('phoneInput').value;
             const stops = Array.from(document.querySelectorAll('.stop-input')).map(i => i.value).filter(v => v);
             const p = document.getElementById('pVal').innerText;
             const d = document.getElementById('infoVal').innerText;
 
-            if(!tel) return alert("Veuillez saisir votre numéro de téléphone pour la facture.");
+            // Récupérer les infos utilisateur
+            let userInfo = currentUser;
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    userInfo = { ...currentUser, ...doc.data() };
+                }
+            } catch (error) {
+                console.error('Erreur récupération profil:', error);
+            }
 
             const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(e)}&waypoints=${encodeURIComponent(stops.join('|'))}&travelmode=driving`;
             
             let msg = `🚕 *NOUVELLE RÉSERVATION KLAK*\n\n`;
-            msg += `📞 *CLIENT :* [${tel}](tel:${tel})\n`;
+            msg += `👤 *CLIENT :* ${userInfo.name || 'Client'}\n`;
+            msg += `📞 *TÉLÉPHONE :* [${userInfo.phone || userInfo.phoneNumber || 'Non renseigné'}](tel:${userInfo.phone || userInfo.phoneNumber || ''})\n`;
+            msg += `📧 *EMAIL :* ${userInfo.email || 'Non renseigné'}\n`;
             msg += `📍 *DÉPART :* ${s}\n`;
             if(stops.length > 0) msg += `🛑 *ÉTAPES :* ${stops.join(' / ')}\n`;
             msg += `🏁 *DESTINATION :* ${e}\n`;
@@ -186,18 +538,29 @@
 
             const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown&reply_markup=${JSON.stringify(keyboard)}`;
 
-            fetch(url).then(res => {
+            try {
+                btn.disabled = true;
+                btnText.innerText = "ENVOI EN COURS...";
+                
+                const res = await fetch(url);
                 if(res.ok) {
                     btn.classList.replace('bg-black', 'bg-green-600');
                     btnText.innerText = "C'EST KLAKÉ ! ENVOYÉ";
                     setTimeout(() => {
                         btn.classList.replace('bg-green-600', 'bg-black');
                         btnText.innerText = "RÉSERVER MA COURSE";
+                        btn.disabled = false;
                     }, 4000);
+                } else {
+                    throw new Error('Erreur envoi');
                 }
-            });
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de l\'envoi de la réservation');
+                btnText.innerText = "RÉSERVER MA COURSE";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
 </html>
-
